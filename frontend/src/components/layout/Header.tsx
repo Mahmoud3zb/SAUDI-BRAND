@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { Search, ShoppingBag, User } from 'lucide-react'
 import { Link } from 'react-router'
+import { useCartStore, useCartTotalQuantity } from '../../features/cart/cart.store.ts'
 import { Button } from '../ui/Button.tsx'
 import { Input } from '../ui/Input.tsx'
 
 export function Header() {
   const [searchQuery, setSearchQuery] = useState('')
+  const totalQuantity = useCartTotalQuantity()
+  const openCart = useCartStore((state) => state.openCart)
 
   return (
     <header className="border-b border-gray-100 bg-white py-2.5 sm:py-3.5">
@@ -36,12 +39,13 @@ export function Header() {
             <Button
               variant="ghost"
               size="sm"
-              aria-label="سلة المشتريات (فارغة)"
-              className="relative p-2 text-gray-700 hover:text-brand-primary"
+              onClick={openCart}
+              aria-label={`سلة المشتريات (${totalQuantity} منتجات)`}
+              className="relative p-2 text-gray-700 hover:text-brand-primary cursor-pointer"
             >
               <ShoppingBag className="h-5 w-5" aria-hidden="true" />
-              <span className="absolute -top-1 -end-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-primary text-[10px] font-bold text-white">
-                0
+              <span className="absolute -top-1 -end-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-primary px-1 text-[10px] font-bold text-white">
+                {totalQuantity}
               </span>
             </Button>
           </div>
@@ -73,13 +77,14 @@ export function Header() {
           <Button
             variant="secondary"
             size="md"
-            aria-label="سلة المشتريات: 0 منتجات"
-            className="relative"
+            onClick={openCart}
+            aria-label={`سلة المشتريات: ${totalQuantity} منتجات`}
+            className="relative cursor-pointer"
             leftIcon={<ShoppingBag className="h-4 w-4" aria-hidden="true" />}
           >
             <span>السلة</span>
             <span className="ms-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-primary px-1 text-[11px] font-bold text-white">
-              0
+              {totalQuantity}
             </span>
           </Button>
         </div>

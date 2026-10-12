@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Package, ShoppingBag, Star } from 'lucide-react'
+import { Check, Package, ShoppingBag, Star } from 'lucide-react'
+import { useCartStore } from '../../features/cart/cart.store.ts'
+import { formatEGP } from '../../lib/formatters.ts'
 import type { Product } from '../../types/index.ts'
 import { Badge } from '../ui/Badge.tsx'
 import { Button } from '../ui/Button.tsx'
@@ -9,20 +11,12 @@ export interface ProductCardProps {
   onAddToCart?: (product: Product) => void
 }
 
-function formatEGP(amount: number): string {
-  try {
-    return new Intl.NumberFormat('ar-EG', {
-      style: 'currency',
-      currency: 'EGP',
-      maximumFractionDigits: 0,
-    }).format(amount)
-  } catch {
-    return `${amount} ج.م`
-  }
-}
-
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const [imageError, setImageError] = useState(false)
+  const [isAdded, setIsAdded] = useState(false)
+
+  const addItem = useCartStore((state) => state.addItem)
+  const openCart = useCartStore((state) => state.openCart)
 
   const hasDiscount =
     typeof product.originalPrice === 'number' && product.originalPrice > product.price
@@ -32,6 +26,17 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
   const isOutOfStock = product.stockStatus === 'out_of_stock'
   const isLowStock = product.stockStatus === 'low_stock'
+
+  const handleAddToCart = () => {
+    if (isOutOfStock) return
+    const success = addItem(product)
+    if (success) {
+      setIsAdded(true)
+      setTimeout(() => setIsAdded(false), 1200)
+      openCart()
+      onAddToCart?.(product)
+    }
+  }
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all duration-200 hover:border-brand-soft-pink hover:shadow-md">
@@ -112,17 +117,28 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           </div>
 
           <Button
-            variant="primary"
+            variant={isAdded ? 'secondary' : 'primary'}
             size="sm"
-            className="w-full"
+            className="w-full transition-all"
             disabled={isOutOfStock}
-            leftIcon={<ShoppingBag className="h-3.5 w-3.5" aria-hidden="true" />}
-            onClick={() => onAddToCart?.(product)}
+            leftIcon={
+              isAdded ? (
+                <Check className="h-3.5 w-3.5 text-brand-primary" aria-hidden="true" />
+              ) : (
+                <ShoppingBag className="h-3.5 w-3.5" aria-hidden="true" />
+              )
+            }
+            onClick={handleAddToCart}
+            aria-live="polite"
             aria-label={
-              isOutOfStock ? `${product.name} غير متوفر` : `أضف ${product.name} إلى السلة`
+              isOutOfStock
+                ? `${product.name} غير متوفر`
+                : isAdded
+                  ? `تمت إضافة ${product.name} إلى السلة`
+                  : `أضف ${product.name} إلى السلة`
             }
           >
-            {isOutOfStock ? 'غير متوفر' : 'أضف إلى السلة'}
+            {isOutOfStock ? 'غير متوفر' : isAdded ? 'تمت الإضافة ✓' : 'أضف إلى السلة'}
           </Button>
         </div>
       </div>

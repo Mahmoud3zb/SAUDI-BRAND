@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router'
+import { CartDrawer } from '../../features/cart/CartDrawer.tsx'
 import { Footer } from './Footer.tsx'
 import { Header } from './Header.tsx'
 import { Navbar } from './Navbar.tsx'
@@ -14,6 +15,7 @@ export function RootLayout() {
         <Outlet />
       </main>
       <Footer />
+      <CartDrawer />
     </div>
   )
 }

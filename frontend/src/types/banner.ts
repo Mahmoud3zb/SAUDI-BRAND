@@ -3,6 +3,7 @@ export interface Banner {
   title: string
   subtitle?: string
   imageUrl?: string
+  mobileImageUrl?: string
   linkUrl?: string
   badge?: string
   textPosition?: 'left' | 'right'
