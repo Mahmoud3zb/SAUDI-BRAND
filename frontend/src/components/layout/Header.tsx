@@ -8,20 +8,19 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState('')
 
   return (
-    <header className="border-b border-gray-100 bg-white py-3.5">
-      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6 lg:px-8">
+    <header className="border-b border-gray-100 bg-white py-2.5 sm:py-3.5">
+      <div className="mx-auto flex max-w-7xl flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           <Link
             to="/"
-            className="flex items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+            className="flex items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
             aria-label="سعودي براند - الصفحة الرئيسية"
           >
-            <span className="text-xl font-extrabold tracking-tight text-brand-primary sm:text-2xl">
-              سعودي براند
-            </span>
-            <span className="hidden text-xs font-semibold uppercase tracking-wider text-gray-400 md:inline">
-              SAUDI BRAND
-            </span>
+            <img
+              src="/new logo.png"
+              alt="سعودي براند | SAUDI BRAND"
+              className="h-12 sm:h-16 w-auto object-contain transition-transform hover:scale-105"
+            />
           </Link>
 
           {/* Mobile action buttons */}
