@@ -1,22 +1,10 @@
 import { useEffect, useRef } from 'react'
-import {
-  ArrowLeft,
-  Minus,
-  Package,
-  Plus,
-  ShoppingBag,
-  Sparkles,
-  Trash2,
-  Truck,
-  X,
-} from 'lucide-react'
+import { ArrowLeft, Minus, Package, Plus, ShoppingBag, Trash2, X } from 'lucide-react'
 import { Link } from 'react-router'
 import { Badge } from '../../components/ui/Badge.tsx'
 import { Button } from '../../components/ui/Button.tsx'
 import { formatEGP } from '../../lib/formatters.ts'
 import { useCartStore, useCartSubtotal, useCartTotalQuantity } from './cart.store.ts'
-
-const FREE_SHIPPING_THRESHOLD = 500
 
 export function CartDrawer() {
   const isOpen = useCartStore((state) => state.isOpen)
@@ -54,9 +42,6 @@ export function CartDrawer() {
       }
     }
   }, [isOpen])
-
-  const freeShippingProgress = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100))
-  const remainingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal)
 
   return (
     <div
@@ -117,35 +102,6 @@ export function CartDrawer() {
             </button>
           </div>
         </div>
-
-        {/* Free Shipping Progress Indicator (when items exist) */}
-        {items.length > 0 && (
-          <div className="bg-brand-soft-pink/60 px-5 py-3 border-b border-brand-soft-pink">
-            <div className="flex items-center gap-2 text-xs font-bold text-brand-secondary">
-              <Truck className="h-4 w-4 shrink-0 text-brand-primary" aria-hidden="true" />
-              {remainingForFreeShipping === 0 ? (
-                <span className="flex items-center gap-1">
-                  <span>تهانينا! لقد حصلتِ على شحن مجاني لكافة المحافظات</span>
-                  <Sparkles className="h-3.5 w-3.5 text-amber-500" aria-hidden="true" />
-                </span>
-              ) : (
-                <span>
-                  أضيفي منتجات بقيمة{' '}
-                  <span className="text-brand-primary font-black">
-                    {formatEGP(remainingForFreeShipping)}
-                  </span>{' '}
-                  للحصول على شحن مجاني
-                </span>
-              )}
-            </div>
-            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/80">
-              <div
-                className="h-full rounded-full bg-brand-primary transition-all duration-300"
-                style={{ width: `${freeShippingProgress}%` }}
-              />
-            </div>
-          </div>
-        )}
 
         {/* Body / Items list */}
         <div className="flex-1 overflow-y-auto px-5 py-4 divide-y divide-gray-100">
@@ -257,8 +213,8 @@ export function CartDrawer() {
               <span className="text-lg font-black text-brand-primary">{formatEGP(subtotal)}</span>
             </div>
 
-            <p className="text-[11px] text-gray-400">
-              * الأسعار تشمل ضريبة القيمة المضافة. مصاريف الشحن يتم تحديدها عند إتمام الطلب.
+            <p className="text-[11px] text-gray-500 leading-relaxed">
+              * مصاريف الشحن والضرائب غير مشمولة في المجموع الفرعي ويتم احتسابها عند إتمام الطلب.
             </p>
 
             {/* Checkout Action */}

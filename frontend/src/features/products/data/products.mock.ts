@@ -9,6 +9,7 @@ export const MOCK_PRODUCTS: Product[] = [
     categoryId: 'perfumes',
     price: 520,
     originalPrice: 650,
+    imageUrl: '/products/prod-1.jpg',
     stockStatus: 'in_stock',
     isFeatured: true,
     rating: {
@@ -24,6 +25,7 @@ export const MOCK_PRODUCTS: Product[] = [
     categoryId: 'haircare',
     price: 153,
     originalPrice: 200,
+    imageUrl: '/products/prod-2.jpg',
     stockStatus: 'in_stock',
     isFeatured: true,
     rating: {
@@ -39,6 +41,7 @@ export const MOCK_PRODUCTS: Product[] = [
     categoryId: 'skincare',
     price: 265,
     originalPrice: 320,
+    imageUrl: '/products/prod-3.jpg',
     stockStatus: 'in_stock',
     isFeatured: true,
     rating: {
@@ -54,6 +57,7 @@ export const MOCK_PRODUCTS: Product[] = [
     categoryId: 'skincare',
     price: 340,
     originalPrice: 420,
+    imageUrl: '/products/prod-4.jpg',
     stockStatus: 'in_stock',
     isFeatured: false,
     rating: {
@@ -69,6 +73,7 @@ export const MOCK_PRODUCTS: Product[] = [
     categoryId: 'gifts',
     price: 780,
     originalPrice: 950,
+    imageUrl: '/products/prod-5.jpg',
     stockStatus: 'in_stock',
     isFeatured: true,
     rating: {
@@ -84,6 +89,7 @@ export const MOCK_PRODUCTS: Product[] = [
     categoryId: 'accessories',
     price: 290,
     originalPrice: 350,
+    imageUrl: '/products/prod-6.jpg',
     stockStatus: 'low_stock',
     isFeatured: false,
     rating: {
@@ -98,6 +104,7 @@ export const MOCK_PRODUCTS: Product[] = [
     description: 'شامبو خالٍ من الكبريتات غني بزيت الأرغان المغربي لإصلاح الشعر التالف والجاف.',
     categoryId: 'haircare',
     price: 185,
+    imageUrl: '/products/prod-7.jpg',
     stockStatus: 'in_stock',
     isFeatured: false,
     rating: {
@@ -113,6 +120,7 @@ export const MOCK_PRODUCTS: Product[] = [
     categoryId: 'offers',
     price: 620,
     originalPrice: 850,
+    imageUrl: '/products/prod-8.jpg',
     stockStatus: 'in_stock',
     isFeatured: true,
     rating: {

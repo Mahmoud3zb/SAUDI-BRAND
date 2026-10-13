@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Check, Package, ShoppingBag, Star } from 'lucide-react'
+import { Link, useNavigate } from 'react-router'
+import { toast } from 'sonner'
 import { useCartStore } from '../../features/cart/cart.store.ts'
 import { formatEGP } from '../../lib/formatters.ts'
 import type { Product } from '../../types/index.ts'
@@ -12,8 +14,10 @@ export interface ProductCardProps {
 }
 
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
+  const navigate = useNavigate()
   const [imageError, setImageError] = useState(false)
   const [isAdded, setIsAdded] = useState(false)
+  const isProcessingRef = useRef(false)
 
   const addItem = useCartStore((state) => state.addItem)
   const openCart = useCartStore((state) => state.openCart)
@@ -27,19 +31,50 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const isOutOfStock = product.stockStatus === 'out_of_stock'
   const isLowStock = product.stockStatus === 'low_stock'
 
-  const handleAddToCart = () => {
-    if (isOutOfStock) return
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation()
+
+    // Prevent duplicate triggers from rapid consecutive clicks
+    if (isProcessingRef.current) return
+    isProcessingRef.current = true
+    setTimeout(() => {
+      isProcessingRef.current = false
+    }, 400)
+
+    if (isOutOfStock) {
+      toast.error(`عذراً، المنتج "${product.name}" غير متوفر حالياً`)
+      return
+    }
+
     const success = addItem(product)
     if (success) {
       setIsAdded(true)
       setTimeout(() => setIsAdded(false), 1200)
-      openCart()
+
+      toast.success(`تمت إضافة "${product.name}" إلى السلة`, {
+        action: {
+          label: 'عرض السلة',
+          onClick: () => openCart(),
+        },
+      })
+
       onAddToCart?.(product)
+    } else {
+      toast.error(`تعذر إضافة "${product.name}" إلى السلة`)
     }
   }
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement
+    if (target.closest('button')) return
+    navigate(`/products/${product.id}`)
+  }
+
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all duration-200 hover:border-brand-soft-pink hover:shadow-md">
+    <article
+      onClick={handleCardClick}
+      className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all duration-200 hover:border-brand-soft-pink hover:shadow-md"
+    >
       {/* Product Image / Visual Placeholder */}
       <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-brand-soft-pink/40 to-white">
         {product.imageUrl && !imageError ? (
@@ -92,9 +127,14 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         )}
 
         {/* Product Title */}
-        <h3 className="line-clamp-2 text-sm font-bold text-gray-900 transition-colors group-hover:text-brand-primary">
-          {product.name}
-        </h3>
+        <Link
+          to={`/products/${product.id}`}
+          className="focus-visible:outline-none focus-visible:underline"
+        >
+          <h3 className="line-clamp-2 text-sm font-bold text-gray-900 transition-colors group-hover:text-brand-primary">
+            {product.name}
+          </h3>
+        </Link>
 
         {/* Short Description */}
         {product.description && (

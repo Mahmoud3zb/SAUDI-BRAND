@@ -43,7 +43,7 @@ export function CategoryGrid() {
         {categories.map((category) => (
           <Link
             key={category.id}
-            to={`/#${category.slug}`}
+            to={`/category/${category.slug}`}
             className="group flex flex-col items-center rounded-2xl border border-gray-100 bg-white p-4 text-center transition-all duration-200 hover:border-brand-primary/30 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
           >
             <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-soft-pink/60 transition-transform duration-200 group-hover:scale-110">

@@ -31,22 +31,31 @@ export function Footer() {
             </h3>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link to="/#perfumes" className="transition-colors hover:text-brand-primary">
+                <Link
+                  to="/category/perfumes"
+                  className="transition-colors hover:text-brand-primary"
+                >
                   العطور
                 </Link>
               </li>
               <li>
-                <Link to="/#skincare" className="transition-colors hover:text-brand-primary">
+                <Link
+                  to="/category/skincare"
+                  className="transition-colors hover:text-brand-primary"
+                >
                   العناية بالبشرة
                 </Link>
               </li>
               <li>
-                <Link to="/#haircare" className="transition-colors hover:text-brand-primary">
+                <Link
+                  to="/category/haircare"
+                  className="transition-colors hover:text-brand-primary"
+                >
                   العناية بالشعر
                 </Link>
               </li>
               <li>
-                <Link to="/#gifts" className="transition-colors hover:text-brand-primary">
+                <Link to="/category/gifts" className="transition-colors hover:text-brand-primary">
                   الهدايا والعروض
                 </Link>
               </li>

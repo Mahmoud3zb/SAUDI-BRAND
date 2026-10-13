@@ -1,4 +1,5 @@
 import { AlertCircle, RefreshCw } from 'lucide-react'
+import { Link } from 'react-router'
 import { useFeaturedProducts } from '../../features/products/hooks/useProducts.ts'
 import { ProductCard } from '../product/ProductCard.tsx'
 import { Button } from '../ui/Button.tsx'
@@ -9,7 +10,7 @@ export function BestSellersSection() {
   return (
     <section aria-labelledby="featured-products-title" className="space-y-6">
       {/* Section Header */}
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 id="featured-products-title" className="text-xl font-bold text-gray-900 sm:text-2xl">
             مختاراتنا الأكثر طلباً
@@ -18,6 +19,13 @@ export function BestSellersSection() {
             تشكيلة مختارة بعناية من أفضل منتجات العناية والعطور
           </p>
         </div>
+
+        <Link
+          to="/products"
+          className="text-xs font-bold text-brand-primary hover:text-brand-secondary transition-colors"
+        >
+          عرض جميع المنتجات &larr;
+        </Link>
       </div>
 
       {/* Loading Skeleton State */}

@@ -8,7 +8,7 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
-  const product = MOCK_PRODUCTS.find((p) => p.id === id)
+  const product = MOCK_PRODUCTS.find((p) => p.id === id || p.slug === id)
   return product ?? null
 }
 

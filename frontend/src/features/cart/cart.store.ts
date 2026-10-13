@@ -92,7 +92,7 @@ export const useCartStore = create<CartState>()(
       name: 'saudi-brand-cart-storage',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
-        // Only persist items; defensively filter out invalid items
+        // Only persist items; defensively filter out invalid items; never persist isOpen
         items: Array.isArray(state.items) ? state.items.filter(isValidCartItem) : [],
       }),
       onRehydrateStorage: () => (state) => {
