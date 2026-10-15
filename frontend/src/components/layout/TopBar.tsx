@@ -4,7 +4,7 @@ export function TopBar() {
   return (
     <aside
       aria-label="إعلانات المتجر"
-      className="border-b border-[#f3ddd3] bg-brand-soft-pink py-1.5 text-xs text-brand-secondary"
+      className="border-b border-[#ebe1d5] bg-brand-soft-pink py-1.5 text-xs text-brand-secondary"
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-1.5 font-medium">

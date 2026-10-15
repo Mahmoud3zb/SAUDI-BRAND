@@ -1,11 +1,11 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-brand-primary: #9c275a;
-  --color-brand-secondary: #8d2b4e;
-  --color-brand-background: #fdf7f4;
-  --color-brand-soft-pink: #fbf0ea;
-  --color-brand-gold: #d4af37;
+  --color-brand-primary: #b18a50;
+  --color-brand-secondary: #95723c;
+  --color-brand-background: #faf7f2;
+  --color-brand-soft-pink: #f5efe6;
+  --color-brand-gold: #b18a50;
 
   --font-sans:
     'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,

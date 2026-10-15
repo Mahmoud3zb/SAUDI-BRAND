@@ -23,7 +23,7 @@ export function PromoBanners() {
       {promoBanners.map((banner) => (
         <article
           key={banner.id}
-          className="relative flex flex-col justify-between overflow-hidden rounded-3xl border border-brand-soft-pink bg-gradient-to-br from-white via-[#fdf7f4] to-brand-soft-pink/40 p-6 sm:p-8 shadow-xs"
+          className="relative flex flex-col justify-between overflow-hidden rounded-3xl border border-brand-soft-pink bg-gradient-to-br from-white via-brand-background to-brand-soft-pink/40 p-6 sm:p-8 shadow-xs"
         >
           <div className="space-y-3">
             {banner.badge && (
