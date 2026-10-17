@@ -7,6 +7,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   perfumes: <Sparkles className="h-6 w-6 text-brand-primary" aria-hidden="true" />,
   skincare: <Heart className="h-6 w-6 text-rose-500" aria-hidden="true" />,
   haircare: <Flame className="h-6 w-6 text-amber-500" aria-hidden="true" />,
+  handmade: <Gem className="h-6 w-6 text-purple-500" aria-hidden="true" />,
   accessories: <Gem className="h-6 w-6 text-purple-500" aria-hidden="true" />,
   gifts: <Gift className="h-6 w-6 text-emerald-500" aria-hidden="true" />,
   offers: <Tag className="h-6 w-6 text-brand-primary" aria-hidden="true" />,

@@ -14,13 +14,13 @@ export function Footer() {
           <div className="space-y-3 md:col-span-1">
             <Link to="/" className="inline-block">
               <img
-                src="/new logo.png"
+                src="/newLogo2.png"
                 alt="سعودي براند | SAUDI BRAND"
                 className="h-12 w-auto object-contain"
               />
             </Link>
             <p className="text-xs leading-relaxed text-gray-500">
-              وجهتكِ الأولى لأرقى العطور ومستحضرات العناية بالبشرة والشعر والإكسسوارات والهدايا.
+              وجهتكِ الأولى لأرقى العطور ومستحضرات العناية بالبشرة والشعر والهاند ميد والهدايا.
             </p>
           </div>
 

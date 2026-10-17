@@ -20,10 +20,10 @@ export const MOCK_CATEGORIES: Category[] = [
     description: 'أقوى الزيوت والسيرومات لتقوية وتكثيف الشعر',
   },
   {
-    id: 'accessories',
-    name: 'الإكسسوارات',
-    slug: 'accessories',
-    description: 'لمسات أنيقة تكمل إطلالتكِ في كل مناسبة',
+    id: 'handmade',
+    name: 'هاند ميد',
+    slug: 'handmade',
+    description: 'قطع وتصاميم يدوية فريدة ومميزة تناسب ذوقكِ الراقي',
   },
   {
     id: 'gifts',

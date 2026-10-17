@@ -232,7 +232,7 @@ export function Header() {
             aria-label="سعودي براند - الصفحة الرئيسية"
           >
             <img
-              src="/new logo.png"
+              src="/newLogo2.png"
               alt="سعودي براند | SAUDI BRAND"
               className="h-12 sm:h-16 w-auto object-contain transition-transform hover:scale-105"
             />

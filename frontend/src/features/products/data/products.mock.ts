@@ -86,7 +86,7 @@ export const MOCK_PRODUCTS: Product[] = [
     name: 'سوار ذهبي كلاسيكي مرصع',
     slug: 'classic-gold-plated-bracelet',
     description: 'تصميم أنيق مطلي بالذهب ومرصع بفصوص لامعة مناسب لجميع الإطلالات.',
-    categoryId: 'accessories',
+    categoryId: 'handmade',
     price: 290,
     originalPrice: 350,
     imageUrl: '/products/prod-6.jpg',

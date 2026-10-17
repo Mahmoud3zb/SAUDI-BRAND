@@ -33,24 +33,24 @@ export function HeroSlider() {
   return (
     <section
       aria-label="بانر العروض الرئيسي"
-      className="relative w-full overflow-hidden bg-[#faebe3] min-h-[500px] sm:min-h-[520px] lg:min-h-[580px] flex items-end md:items-center"
+      className="relative w-full overflow-hidden bg-[#F6EFE6] min-h-[500px] sm:min-h-[520px] lg:min-h-[580px] flex items-end md:items-center"
     >
       {/* Background Hero Image */}
       <div className="absolute inset-0 h-full w-full">
         <img
           src={currentBanner.imageUrl || '/newHero.png'}
           alt={`${currentBanner.title} - العطور والعناية`}
-          className="h-full w-full object-cover object-[72%_15%] sm:object-[70%_center] md:object-center"
+          className="h-full w-full object-cover object-[78%_15%] sm:object-[72%_center] md:object-center"
           loading="eager"
         />
-        {/* Mobile: Atmospheric soft gradient from bottom so model at top is crystal clear and text at bottom has perfect legibility */}
+        {/* Mobile: Atmospheric soft warm ivory gradient from bottom so model at top is crystal clear and text at bottom has perfect legibility */}
         <div
-          className="absolute inset-0 bg-gradient-to-t from-[#faebe3] from-15% via-[#faebe3]/80 via-45% to-transparent to-80% md:hidden"
+          className="absolute inset-0 bg-gradient-to-t from-[#F6EFE6] from-15% via-[#F6EFE6]/85 via-45% to-transparent to-80% md:hidden"
           aria-hidden="true"
         />
         {/* Desktop: Soft side ambient gradient */}
         <div
-          className="hidden md:block absolute inset-0 bg-gradient-to-r from-transparent via-[#faebe3]/20 to-[#faebe3]/60"
+          className="hidden md:block absolute inset-0 bg-gradient-to-r from-transparent via-[#F6EFE6]/15 to-[#F6EFE6]/50"
           aria-hidden="true"
         />
       </div>
@@ -85,7 +85,7 @@ export function HeroSlider() {
           >
             {/* Brand Logo in Hero (Desktop only; on mobile, header already prominently displays the logo) */}
             <img
-              src="/new logo.png"
+              src="/newLogo2.png"
               alt="سعودي براند | SAUDI BRAND"
               className="hidden md:block h-24 lg:h-28 w-auto object-contain drop-shadow-xs mb-2 mx-auto md:mx-0"
             />

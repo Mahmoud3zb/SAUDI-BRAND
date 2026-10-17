@@ -17,7 +17,8 @@ export async function getFeaturedProducts(): Promise<Product[]> {
 }
 
 export async function getProductsByCategory(categoryId: string): Promise<Product[]> {
-  return MOCK_PRODUCTS.filter((p) => p.categoryId === categoryId)
+  const targetId = categoryId === 'accessories' ? 'handmade' : categoryId
+  return MOCK_PRODUCTS.filter((p) => p.categoryId === targetId)
 }
 
 export async function getCategories(): Promise<Category[]> {
@@ -25,7 +26,9 @@ export async function getCategories(): Promise<Category[]> {
 }
 
 export async function getCategoryById(id: string): Promise<Category | null> {
-  const category = MOCK_CATEGORIES.find((c) => c.id === id)
+  const category = MOCK_CATEGORIES.find(
+    (c) => c.id === id || c.slug === id || (id === 'accessories' && c.id === 'handmade'),
+  )
   return category ?? null
 }
 
