@@ -15,7 +15,7 @@ export function HeroSlider() {
     subtitle: 'اختاري لمستك .. واكتشفي منتجاتك المفضلة',
     imageUrl: '/newHero.png',
     linkUrl: '/#offers',
-    textPosition: 'left',
+    textPosition: 'right',
   }
 
   const totalBanners = bannerList.length > 0 ? bannerList.length : 3
@@ -40,7 +40,7 @@ export function HeroSlider() {
         <img
           src={currentBanner.imageUrl || '/newHero.png'}
           alt={`${currentBanner.title} - العطور والعناية`}
-          className="h-full w-full object-cover object-[78%_15%] sm:object-[72%_center] md:object-center"
+          className="h-full w-full object-cover object-[22%_15%] sm:object-[28%_center] md:object-center"
           loading="eager"
         />
         {/* Mobile: Atmospheric soft warm ivory gradient from bottom so model at top is crystal clear and text at bottom has perfect legibility */}
@@ -48,15 +48,15 @@ export function HeroSlider() {
           className="absolute inset-0 bg-gradient-to-t from-[#F6EFE6] from-15% via-[#F6EFE6]/85 via-45% to-transparent to-80% md:hidden"
           aria-hidden="true"
         />
-        {/* Desktop: Soft side ambient gradient */}
+        {/* Desktop: Soft side ambient gradient on the right (start) side behind the text */}
         <div
-          className="hidden md:block absolute inset-0 bg-gradient-to-r from-transparent via-[#F6EFE6]/15 to-[#F6EFE6]/50"
+          className="hidden md:block absolute inset-0 bg-gradient-to-l from-[#F6EFE6]/60 via-[#F6EFE6]/20 to-transparent"
           aria-hidden="true"
         />
       </div>
 
       {/* Floating Edge Navigation Arrows (Desktop/Tablet) */}
-      <button
+      {/* <button
         type="button"
         onClick={handleNext}
         aria-label="الشريحة السابقة"
@@ -72,7 +72,7 @@ export function HeroSlider() {
         className="hidden sm:flex absolute top-1/2 end-3 sm:end-5 -translate-y-1/2 z-20 h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-md backdrop-blur-xs transition hover:bg-brand-soft-pink hover:text-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary cursor-pointer"
       >
         <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-      </button>
+      </button> */}
 
       {/* Main Content Container */}
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-10 lg:px-16 pt-6 pb-8 md:py-16">
