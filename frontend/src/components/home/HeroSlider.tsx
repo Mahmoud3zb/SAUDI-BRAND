@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Award, CheckCircle2, ChevronLeft, ChevronRight, ShoppingCart, Truck } from 'lucide-react'
+import { Award, CheckCircle2, ShoppingCart, Truck } from 'lucide-react'
 import { Link } from 'react-router'
 import { useBanners } from '../../features/products/hooks/useBanners.ts'
 import { Button } from '../ui/Button.tsx'
@@ -21,14 +21,6 @@ export function HeroSlider() {
   const totalBanners = bannerList.length > 0 ? bannerList.length : 3
   const isTextOnLeft = currentBanner.textPosition === 'left'
   const isNewHeroImage = currentBanner.imageUrl?.includes('newHero')
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev === 0 ? totalBanners - 1 : prev - 1))
-  }
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev === totalBanners - 1 ? 0 : prev + 1))
-  }
 
   return (
     <section
@@ -54,25 +46,6 @@ export function HeroSlider() {
           aria-hidden="true"
         />
       </div>
-
-      {/* Floating Edge Navigation Arrows (Desktop/Tablet) */}
-      {/* <button
-        type="button"
-        onClick={handleNext}
-        aria-label="الشريحة السابقة"
-        className="hidden sm:flex absolute top-1/2 start-3 sm:start-5 -translate-y-1/2 z-20 h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-md backdrop-blur-xs transition hover:bg-brand-soft-pink hover:text-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary cursor-pointer"
-      >
-        <ChevronRight className="h-5 w-5" aria-hidden="true" />
-      </button>
-
-      <button
-        type="button"
-        onClick={handlePrev}
-        aria-label="الشريحة التالية"
-        className="hidden sm:flex absolute top-1/2 end-3 sm:end-5 -translate-y-1/2 z-20 h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-md backdrop-blur-xs transition hover:bg-brand-soft-pink hover:text-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary cursor-pointer"
-      >
-        <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-      </button> */}
 
       {/* Main Content Container */}
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-10 lg:px-16 pt-6 pb-8 md:py-16">
