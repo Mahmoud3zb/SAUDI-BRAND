@@ -18,8 +18,8 @@ router.get("/:id", getCategory);
 
 router.post(
     "/",
-    isAuthenticated,
-    isAuthorized(Role.ADMIN),
+    // isAuthenticated,
+    // isAuthorized(Role.ADMIN),
     addCategoryValidation,
     handleValidationErrors,
     addCategory

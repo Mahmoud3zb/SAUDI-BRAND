@@ -5,8 +5,9 @@ interface Iitem {
     quantity: number;
 }
 
-enum Status {
+export enum Status {
     PENDING = "pending",
+    CONFIRMED = "confirmed",
     COMPLETED = "completed",
     CANCELLED = "cancelled"
 }
@@ -22,26 +23,32 @@ interface IOrder{
 
 const OrderSchema = new mongoose.Schema<IOrder>({
     userID: {
-        type: mongoose.Types.ObjectId,
-        required: true
-    },
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+},
     items: {
-            type: [
-                {
-                    productID: {
-                        type: mongoose.Schema.Types.ObjectId,
-                        ref: "Product",
-                        required: true
-                    },
-                    quantity: {
-                        type: Number,
-                        required: true,
-                        min: [1, "Quantity must be at least 1"]
-                    },
-                }
-            ],
-            default: []
-        },
+    type: [
+        {
+            productID: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Product",
+                required: true
+            },
+            quantity: {
+                type: Number,
+                required: true,
+                min: 1
+            },
+            price: {
+                type: Number,
+                required: true,
+                min: 0
+            }
+        }
+    ],
+    default: []
+},
     totalPrice: {
         type: Number,
         required: true,
@@ -55,3 +62,5 @@ const OrderSchema = new mongoose.Schema<IOrder>({
 }, {
     timestamps: true
 });
+
+export const Order = mongoose.model<IOrder>("Order", OrderSchema);

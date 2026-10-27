@@ -7,8 +7,10 @@ import userRouter from "./src/user/user-router";
 import authRouter from "./src/auth/auth-router";
 import productRouter from "./src/product/product-router";
 import categoryRouter from "./src/category/category-router";
-// import cors from "cors";
-// import helmet from "helmet";
+import cors from "cors";
+import helmet from "helmet";
+import { cartRouter } from "./src/cart/cart-router";
+import orderRouter from "./src/order/order-router";
 
 // Routers
 
@@ -34,26 +36,26 @@ mongoose
         process.exit(1);
     });
 
-// app.use(helmet());
+app.use(helmet());
 
 
 const allowedOrigins = process.env.FRONTEND_URL 
     ? [process.env.FRONTEND_URL.replace(/\/$/, ""), "http://localhost:5173", "http://localhost:3000"]
     : ["http://localhost:5173", "http://localhost:3000"];
 
-// app.use(
-//     cors({
-//         origin: (origin, callback) => {
-//             if (!origin || allowedOrigins.includes(origin)) {
-//                 callback(null, true);
-//             } else {
-//                 callback(new Error("Not allowed by CORS"));
-//             }
-//         },
-//         methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-//         allowedHeaders: ["Content-Type", "Authorization", "X-Skip-Auth-Redirect", "x-skip-auth-redirect"]
-//     })
-// );
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error("Not allowed by CORS"));
+            }
+        },
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization", "X-Skip-Auth-Redirect", "x-skip-auth-redirect"]
+    })
+);
 
 app.use(cookieParser());
 app.use(express.static("public"));
@@ -64,6 +66,8 @@ app.use("/api/user",userRouter)
 app.use("/api/auth",authRouter)
 app.use("/api/category",categoryRouter)
 app.use("/api/product",productRouter)
+app.use("/api/cart",cartRouter)
+app.use("/api/order",orderRouter)
 
 app.get('/', (req, res) => {
     res.status(200).send('SAUDI-BRAND API is running');
