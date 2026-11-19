@@ -5,8 +5,8 @@ import { body } from "express-validator";
 
 export const updateOrderStatusValidation = [
     body("status")
-    .isEmpty().withMessage("Status is required")
-    .isIn(Object.values(Status)).withMessage("Invalid status"),
+        .notEmpty().withMessage("Status is required")
+        .isIn(Object.values(Status)).withMessage("Invalid status"),
 ];
 
 interface IRequest {

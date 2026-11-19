@@ -51,7 +51,7 @@ export function AdminOrdersPage() {
     },
   })
 
-  const orders = data?.orders || []
+  const orders = data?.data || []
   const filteredOrders = orders.filter((order) => {
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter
     const user = typeof order.userID === 'object' && order.userID !== null ? order.userID : null

@@ -7,37 +7,63 @@ export enum Role{
 
 
 
-interface IUser extends mongoose.Document {
-    name:string,
-    email:string,
-    password:string,
-    role?:Role
+export interface IAddress {
+    street?: string;
+    city?: string;
+    country?: string;
 }
 
+export interface IUser extends mongoose.Document {
+    name: string;
+    email: string;
+    password: string;
+    role?: Role;
+    address?: IAddress;
+    profileImage?: string;
+    passwordResetToken?: string;
+    passwordResetExpires?: Date;
+}
 
-const UserShcema = new mongoose.Schema<IUser>({
-    name:{
+const UserSchema = new mongoose.Schema<IUser>({
+    name: {
         type: String,
         required: true,
-        trime: true
+        trim: true
     },
-    email:{
+    email: {
         type: String,
         required: true,
-        trime: true,
+        trim: true,
         unique: true
     },
-    password:{
+    password: {
         type: String,
         required: true,
-        trime: true,
+        trim: true,
         minlength: [6, "Password must be at least 6 characters long"]
     },
     role: {
         type: String,
         enum: Object.values(Role),
         default: Role.USER
+    },
+    address: {
+        street: { type: String, trim: true },
+        city: { type: String, trim: true },
+        country: { type: String, trim: true }
+    },
+    profileImage: {
+        type: String,
+        default: ""
+    },
+    passwordResetToken: {
+        type: String
+    },
+    passwordResetExpires: {
+        type: Date
     }
-})
+}, {
+    timestamps: true
+});
 
-export const User = mongoose.model<IUser>("User", UserShcema);
+export const User = mongoose.model<IUser>("User", UserSchema);

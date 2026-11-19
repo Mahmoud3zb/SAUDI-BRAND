@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import { OAuth2Client } from "google-auth-library";
 import crypto from "crypto";
+import bcrypt from "bcrypt";
 import { User, Role } from "../user/user-model";
 import { jwtService } from "../services/jwt-service";
 import { COOKIE_OPTIONS } from "./login";
@@ -34,11 +35,12 @@ export const googleLogin: RequestHandler = async (req, res) => {
 
         if (!user) {
             const randomPassword = crypto.randomBytes(16).toString("hex");
+            const hashedPassword = await bcrypt.hash(randomPassword, 10);
             user = await User.create({
                 name: name || "Google User",
                 email: email,
-                password: randomPassword,
-                role: Role.User,
+                password: hashedPassword,
+                role: Role.USER,
             });
         }
 

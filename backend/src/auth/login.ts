@@ -20,11 +20,13 @@ export const loginValidation = [
 //         path: "/",
 // };
 
+const isProduction = process.env.NODE_ENV === "production";
+
 export const COOKIE_OPTIONS = {
-        httpOnly: true,
-        sameSite: "none" as const, // يجب أن تكون "none" للعمل عبر النطاقات
-        secure: true,             // يجب أن تكون true دائماً مع sameSite: "none"
-        path: "/",
+    httpOnly: true,
+    sameSite: (isProduction ? "none" : "lax") as "none" | "lax",
+    secure: isProduction,
+    path: "/",
 };
 
 export const loginHandler: RequestHandler = async (req, res, next) => {
@@ -67,6 +69,7 @@ export const loginHandler: RequestHandler = async (req, res, next) => {
 
                 return res.status(200).json({
                         message: "Logged in successfully",
+                        token,
                         user: userWithoutPassword
                 });
         } catch (err) {

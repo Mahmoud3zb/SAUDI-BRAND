@@ -36,7 +36,7 @@ export function AdminOverviewPage() {
 
   const products = productsData?.data || []
   const categories = categoriesData?.data || []
-  const orders = ordersData?.orders || []
+  const orders = ordersData?.data || []
 
   const totalSales = orders
     .filter((o: AdminOrder) => o.status === 'completed' || o.status === 'confirmed')

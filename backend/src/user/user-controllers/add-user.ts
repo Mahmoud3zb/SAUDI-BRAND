@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
+import bcrypt from "bcrypt";
 import { Role, User } from "../user-model";
 import { body } from "express-validator";
 
@@ -26,29 +27,41 @@ interface IRequest{
     role?: Role
 }
 
-interface IResponse{
-    message: string,
-    data:unknown
+interface IResponse {
+    message: string;
+    data?: unknown;
 }
-export const addUser: RequestHandler<{},IResponse,IRequest> =
-async (
+export const addUser: RequestHandler<{}, IResponse, IRequest> = async (
     req,
     res,
     next
 ) => {
-    try{
-        const { name , email , password , role } = req.body;
+    try {
+        const { name, email, password, role } = req.body;
+
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(StatusCodes.CONFLICT).json({
+                message: "Email is already registered"
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
         const user = await User.create({
             name,
             email,
-            password,
-            role
+            password: hashedPassword,
+            role: role || Role.USER
         });
+
+        const userObj = user.toObject();
+        const { password: _, ...userWithoutPassword } = userObj;
+
         return res.status(StatusCodes.CREATED).json({
-            message:"User created successfully",
-            data:user
+            message: "User created successfully",
+            data: userWithoutPassword
         });
-    }catch(err){
+    } catch (err) {
         next(err);
     }
-}
+};

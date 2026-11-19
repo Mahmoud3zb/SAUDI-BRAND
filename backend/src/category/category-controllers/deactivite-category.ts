@@ -12,10 +12,10 @@ export const deactiviteCategory: RequestHandler<{ id: string }> = async (req, re
                 message: "Category not found",
             });
         }
-        category.isActive = false;
+        category.isActive = !category.isActive;
         await category.save();
         return res.status(StatusCodes.OK).json({
-            message: "Category deactivated successfully",
+            message: `Category status updated to ${category.isActive ? "active" : "inactive"}`,
             data: category,
         });
     } catch (err) {

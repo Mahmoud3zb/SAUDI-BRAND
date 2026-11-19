@@ -61,7 +61,8 @@ export const adminApi = {
     apiClient<{ message: string }>(`/category/${id}/deactivate`, { method: 'PATCH' }),
 
   // Orders
-  getOrders: () => apiClient<{ message: string; orders: AdminOrder[] }>('/order/orders'),
+  getOrders: () =>
+    apiClient<{ message: string; data: AdminOrder[]; total: number }>('/order/orders'),
   updateOrderStatus: (id: string, status: string) =>
     apiClient<{ message: string }>(`/order/${id}`, { method: 'PUT', data: { status } }),
 }

@@ -13,15 +13,35 @@ interface RequestOptions extends RequestInit {
   data?: unknown
 }
 
+function getStoredToken(): string | null {
+  try {
+    const raw = localStorage.getItem('saudi_brand_admin_auth')
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      return parsed?.state?.token || null
+    }
+  } catch {
+    // ignore parse error
+  }
+  return null
+}
+
 export async function apiClient<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-  const { data, headers, ...customConfig } = options
+  const { data, headers = {}, ...customConfig } = options
 
   const isFormData = data instanceof FormData
+  const token = getStoredToken()
+
+  const authHeaders: Record<string, string> = {}
+  if (token) {
+    authHeaders['Authorization'] = `Bearer ${token}`
+  }
 
   const config: RequestInit = {
     ...customConfig,
     headers: {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+      ...authHeaders,
       ...headers,
     },
     credentials: 'include', // Automatically send and receive cookies from backend

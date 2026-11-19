@@ -11,6 +11,7 @@ export interface AdminUser {
 
 interface AdminAuthState {
   admin: AdminUser | null
+  token: string | null
   isAuthenticated: boolean
   isLoading: boolean
   login: (email: string, password: string) => Promise<boolean>
@@ -22,41 +23,37 @@ export const useAdminAuthStore = create<AdminAuthState>()(
   persist(
     (set, get) => ({
       admin: null,
+      token: null,
       isAuthenticated: false,
       isLoading: false,
 
       login: async (email: string, password: string) => {
         set({ isLoading: true })
-        const normalizedEmail = email.trim().toLowerCase()
-        const isDemo =
-          (normalizedEmail === 'admin@saudibrand.com' && password === 'admin123') ||
-          (normalizedEmail === 'admin' && password === 'admin')
 
         try {
-          const res = await apiClient<{ message: string; user: AdminUser }>('/auth/login', {
-            method: 'POST',
-            data: { email, password },
-          })
+          const res = await apiClient<{ message: string; token: string; user: AdminUser }>(
+            '/auth/login',
+            {
+              method: 'POST',
+              data: { email, password },
+            },
+          )
 
           const user = res.user
+          const token = res.token
+
           if (user?.role !== 'admin') {
             throw new Error('غير مصرح لك بالدخول: هذا الحساب ليس حساب مدير.')
           }
 
-          set({ admin: user, isAuthenticated: true, isLoading: false })
+          if (!token) {
+            throw new Error('فشل الحصول على رمز التوثيق من الخادم.')
+          }
+
+          set({ admin: user, token, isAuthenticated: true, isLoading: false })
           return true
         } catch (error) {
-          if (isDemo) {
-            const devAdmin: AdminUser = {
-              id: 'admin_dev_01',
-              name: 'مدير سعودي براند',
-              email: 'admin@saudibrand.com',
-              role: 'admin',
-            }
-            set({ admin: devAdmin, isAuthenticated: true, isLoading: false })
-            return true
-          }
-          set({ isLoading: false, admin: null, isAuthenticated: false })
+          set({ isLoading: false, admin: null, token: null, isAuthenticated: false })
           throw error
         }
       },
@@ -67,13 +64,13 @@ export const useAdminAuthStore = create<AdminAuthState>()(
         } catch {
           // ignore network logout errors
         } finally {
-          set({ admin: null, isAuthenticated: false })
+          set({ admin: null, token: null, isAuthenticated: false })
         }
       },
 
       checkAuth: () => {
         const state = get()
-        return state.isAuthenticated && state.admin?.role === 'admin'
+        return state.isAuthenticated && Boolean(state.token) && state.admin?.role === 'admin'
       },
     }),
     {

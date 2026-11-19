@@ -12,6 +12,7 @@ export const getUsers: RequestHandler = async (req, res, next) => {
         );
         const [users, total] = await Promise.all([
             User.find()
+                .select("-password")
                 .sort({ createdAt: -1 })
                 .skip((page - 1) * limit)
                 .limit(limit),

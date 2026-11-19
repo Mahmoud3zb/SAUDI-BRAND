@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 interface Iitem {
     productID: mongoose.Types.ObjectId;
     quantity: number;
+    price: number;
 }
 
 export enum Status {

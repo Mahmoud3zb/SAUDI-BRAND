@@ -2,7 +2,6 @@ import { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import { Order } from "../order-model";
-import { populate } from "dotenv";
 
 
 
