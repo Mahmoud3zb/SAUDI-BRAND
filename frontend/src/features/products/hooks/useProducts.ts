@@ -4,13 +4,14 @@ import {
   getProductById,
   getProducts,
   getProductsByCategory,
+  type GetProductsParams,
 } from '../api/products.api.ts'
 import { productKeys } from '../queries/product-keys.ts'
 
-export function useProducts() {
+export function useProducts(params?: GetProductsParams) {
   return useQuery({
-    queryKey: productKeys.lists(),
-    queryFn: getProducts,
+    queryKey: params ? [...productKeys.lists(), params] : productKeys.lists(),
+    queryFn: () => getProducts(params),
   })
 }
 

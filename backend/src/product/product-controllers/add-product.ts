@@ -16,32 +16,60 @@ export const addProductValidation = [
     body("price")
         .notEmpty().withMessage("Price is required")
         .isNumeric().withMessage("Price must be a number"),
+    body("originalPrice").optional().isNumeric().withMessage("Original price must be a number"),
+    body("stockQuantity").optional().isNumeric().withMessage("Stock quantity must be a number"),
+    body("isFeatured").optional().isBoolean(),
     body("description").optional().trim(),
     body("isActive").optional().isBoolean(),
 ];
 
-export const addProduct: RequestHandler = async (req, res,next) => {
-    try{
-        const { categoryID, name, price, description, isActive } = req.body;
-        const imageUrl=req.file?.path
-        if(!mongoose.Types.ObjectId.isValid(categoryID)){
+export const addProduct: RequestHandler = async (req, res, next) => {
+    try {
+        const {
+            categoryID,
+            name,
+            price,
+            originalPrice,
+            stockQuantity,
+            isFeatured,
+            slug,
+            description,
+            isActive
+        } = req.body;
+
+        const imageUrl = req.file?.path || req.body.imageUrl;
+        if (!imageUrl) {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                message: "Product image is required"
+            });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(categoryID)) {
             return res.status(StatusCodes.BAD_REQUEST).json({
                 message: "Invalid category ID format",
             });
         }
+
+        const generatedSlug = slug || name.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^\w\u0621-\u064A-]+/g, "");
+
         const product = await Product.create({
             categoryID,
-            imageUrl,
             name,
-            price,
+            slug: generatedSlug,
+            price: Number(price),
+            originalPrice: originalPrice ? Number(originalPrice) : undefined,
+            stockQuantity: stockQuantity !== undefined ? Number(stockQuantity) : 10,
+            isFeatured: Boolean(isFeatured),
+            imageUrl,
             description,
-            isActive,
+            isActive: isActive !== undefined ? Boolean(isActive) : true,
         });
+
         return res.status(StatusCodes.CREATED).json({
             message: "Product created successfully",
             data: product,
         });
-    }catch(err){
+    } catch (err) {
         next(err);
     }
 };

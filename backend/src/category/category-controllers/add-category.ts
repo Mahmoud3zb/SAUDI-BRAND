@@ -9,12 +9,14 @@ export const addCategoryValidation = [
         .trim()
         .notEmpty().withMessage("Name is required")
         .isLength({ min: 2 }).withMessage("Name must be at least 2 characters long"),
+    body("slug").optional().trim(),
     body("description").optional().trim(),
     body("isActive").optional().isBoolean(),
 ];
 
 interface IRequest {
     name: string;
+    slug?: string;
     description?: string;
     isActive?: boolean;
 }
@@ -26,11 +28,20 @@ interface IResponse {
 
 export const addCategory: RequestHandler<{}, IResponse, IRequest> = async (req, res, next) => {
     try {
-        const { name, description, isActive } = req.body;
+        const { name, slug, description, isActive } = req.body;
+        const generatedSlug =
+            slug ||
+            name
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, "-")
+                .replace(/[^\w\u0621-\u064A-]+/g, "");
+
         const category = await Category.create({
             name,
+            slug: generatedSlug,
             description,
-            isActive,
+            isActive: isActive !== undefined ? isActive : true,
         });
         return res.status(StatusCodes.CREATED).json({
             message: "Category created successfully",

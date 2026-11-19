@@ -9,6 +9,9 @@ export const updateProductValidation = [
     body("categoryID").optional().isMongoId().withMessage("Invalid category ID format"),
     body("name").optional().trim().isLength({ min: 2 }).withMessage("Name must be at least 2 characters long"),
     body("price").optional().isNumeric().withMessage("Price must be a number"),
+    body("originalPrice").optional().isNumeric().withMessage("Original price must be a number"),
+    body("stockQuantity").optional().isNumeric().withMessage("Stock quantity must be a number"),
+    body("isFeatured").optional().isBoolean(),
     body("description").optional().trim(),
 ];
 
@@ -16,6 +19,10 @@ interface IRequest {
     categoryID?: string;
     name?: string;
     price?: number;
+    originalPrice?: number;
+    stockQuantity?: number;
+    isFeatured?: boolean;
+    slug?: string;
     description?: string;
 }
 
@@ -24,9 +31,18 @@ interface IResponse {
     data?: unknown;
 }
 
-export const updateProduct: RequestHandler<{ id: string }, IResponse, IRequest> = async (req, res,next) => {
+export const updateProduct: RequestHandler<{ id: string }, IResponse, IRequest> = async (req, res, next) => {
     try {
-        const { categoryID, name, price, description } = req.body;
+        const {
+            categoryID,
+            name,
+            price,
+            originalPrice,
+            stockQuantity,
+            isFeatured,
+            slug,
+            description
+        } = req.body;
         const imageUrl = req.file?.path;
         const id = req.params.id;
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -36,11 +52,15 @@ export const updateProduct: RequestHandler<{ id: string }, IResponse, IRequest> 
         if (!product) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: "Product not found" });
         }
-        const updateObject:any = {};
+        const updateObject: any = {};
         if (categoryID) updateObject.categoryID = categoryID;
         if (name) updateObject.name = name;
-        if (price) updateObject.price = price;
-        if (description) updateObject.description = description;
+        if (price !== undefined) updateObject.price = Number(price);
+        if (originalPrice !== undefined) updateObject.originalPrice = Number(originalPrice);
+        if (stockQuantity !== undefined) updateObject.stockQuantity = Number(stockQuantity);
+        if (isFeatured !== undefined) updateObject.isFeatured = Boolean(isFeatured);
+        if (slug) updateObject.slug = slug;
+        if (description !== undefined) updateObject.description = description;
         if (imageUrl) updateObject.imageUrl = imageUrl;
         const updatedProduct = await Product.findByIdAndUpdate(
             id,
