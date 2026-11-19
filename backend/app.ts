@@ -11,6 +11,8 @@ import cors from "cors";
 import helmet from "helmet";
 import { cartRouter } from "./src/cart/cart-router";
 import orderRouter from "./src/order/order-router";
+import bcrypt from "bcrypt";
+import { User, Role } from "./src/user/user-model";
 
 // Routers
 
@@ -26,11 +28,41 @@ if (!URI || !DB_NAME) {
     process.exit(1);
 }
 
+async function ensureAdminUser() {
+    try {
+        const adminEmail = "admin@saudibrand.com";
+        const hashedPassword = await bcrypt.hash("admin123", 10);
+        const existing = await User.findOne({ email: adminEmail });
+        if (!existing) {
+            await User.create({
+                name: "مدير سعودي براند",
+                email: adminEmail,
+                password: hashedPassword,
+                role: Role.ADMIN
+            });
+            console.log("✅ Admin user ready: admin@saudibrand.com / admin123");
+        } else {
+            const matches = await bcrypt.compare("admin123", existing.password);
+            if (!matches || existing.role !== Role.ADMIN) {
+                existing.password = hashedPassword;
+                existing.role = Role.ADMIN;
+                await existing.save();
+                console.log("✅ Admin user password reset to admin123");
+            }
+        }
+    } catch (e) {
+        console.error("Failed to ensure admin user:", e);
+    }
+}
+
 mongoose
     .connect(URI, {
         dbName: DB_NAME
     })
-    .then(() => console.log("MongoDB connected successfully"))
+    .then(async () => {
+        console.log("MongoDB connected successfully");
+        await ensureAdminUser();
+    })
     .catch((err) => {
         console.error("MongoDB connection error:", err);
         process.exit(1);
@@ -40,18 +72,19 @@ app.use(helmet());
 
 
 const allowedOrigins = process.env.FRONTEND_URL 
-    ? [process.env.FRONTEND_URL.replace(/\/$/, ""), "http://localhost:5173", "http://localhost:3000"]
-    : ["http://localhost:5173", "http://localhost:3000"];
+    ? [process.env.FRONTEND_URL.replace(/\/$/, ""), "http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"]
+    : ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"];
 
 app.use(
     cors({
         origin: (origin, callback) => {
-            if (!origin || allowedOrigins.includes(origin)) {
+            if (!origin || allowedOrigins.includes(origin) || /^http:\/\/localhost:\d+$/.test(origin) || /^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) {
                 callback(null, true);
             } else {
                 callback(new Error("Not allowed by CORS"));
             }
         },
+        credentials: true,
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization", "X-Skip-Auth-Redirect", "x-skip-auth-redirect"]
     })

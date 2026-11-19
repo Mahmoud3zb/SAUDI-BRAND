@@ -20,7 +20,7 @@ export const getOrder: RequestHandler<{ id: string }> = async (req, res, next) =
             });
         }
 
-        const isOwner = req.user?.id && order.userID.toString() === req.user.id;
+        const isOwner = Boolean(req.user?.id && order.userID && order.userID.toString() === req.user.id);
         const isAdmin = req.user?.role === Role.ADMIN;
 
         if (!isOwner && !isAdmin) {

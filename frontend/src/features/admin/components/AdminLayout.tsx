@@ -15,8 +15,8 @@ import { useAdminAuthStore } from '../../auth/admin-auth.store.ts'
 
 const navItems = [
   { to: '/admin', label: 'نظرة عامة', icon: BarChart3, end: true },
-  { to: '/admin/products', label: 'المنتجات', icon: Boxes },
   { to: '/admin/categories', label: 'الأقسام', icon: FolderTree },
+  { to: '/admin/products', label: 'المنتجات', icon: Boxes },
   { to: '/admin/orders', label: 'الطلبات', icon: ShoppingBag },
 ]
 

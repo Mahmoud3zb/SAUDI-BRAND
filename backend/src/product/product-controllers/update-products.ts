@@ -43,7 +43,7 @@ export const updateProduct: RequestHandler<{ id: string }, IResponse, IRequest> 
             slug,
             description
         } = req.body;
-        const imageUrl = req.file?.path;
+        const imageUrl = req.file?.path || (req.body as any).imageUrl;
         const id = req.params.id;
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid product ID format" });

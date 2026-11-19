@@ -214,18 +214,18 @@ export function CartDrawer() {
             </div>
 
             <p className="text-[11px] text-gray-500 leading-relaxed">
-              * مصاريف الشحن والضرائب غير مشمولة في المجموع الفرعي ويتم احتسابها عند إتمام الطلب.
+              * الشحن: 100 ج.م للقاهرة، 80 ج.م للدلتا، 60 ج.م للصعيد. يتم تأكيد الطلب فورياً عبر الواتساب 💬
             </p>
 
             {/* Checkout Action */}
             <div className="pt-1 flex flex-col gap-2">
-              <Link to="/#checkout" onClick={closeCart} className="w-full">
+              <Link to="/checkout" onClick={closeCart} className="w-full">
                 <Button
                   variant="primary"
                   size="lg"
                   className="w-full font-bold shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                 >
-                  <span>متابعة الشراء (إتمام الطلب)</span>
+                  <span>متابعة الشراء (تأكيد الأوردر)</span>
                   <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </Link>

@@ -4,6 +4,9 @@ export interface AdminProduct {
   _id: string
   name: string
   price: number
+  originalPrice?: number
+  stockQuantity?: number
+  isFeatured?: boolean
   imageUrl: string
   description?: string
   categoryID: string | { _id: string; name: string }
@@ -27,9 +30,20 @@ export interface OrderItem {
 
 export interface AdminOrder {
   _id: string
-  userID: { _id: string; name: string; email: string } | string
+  userID?: { _id: string; name: string; email: string } | string
+  customerName?: string
+  customerPhone?: string
+  shippingAddress?: {
+    city: string
+    district?: string
+    street: string
+    notes?: string
+  }
   items: OrderItem[]
   totalPrice: number
+  shippingFee?: number
+  paymentMethod?: 'cod' | 'vodafone_cash' | 'instapay' | 'card' | 'tabby' | 'tamara' | string
+  paymentStatus?: 'unpaid' | 'paid'
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
   createdAt: string
   updatedAt: string

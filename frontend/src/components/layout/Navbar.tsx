@@ -20,7 +20,7 @@ export function Navbar() {
   return (
     <nav aria-label="أقسام المتجر الرئيسية" className="border-b border-gray-100 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <ul className="flex items-center gap-1 overflow-x-auto py-2 sm:justify-center sm:gap-2">
+        <ul className="flex items-center gap-1.5 overflow-x-auto py-2 sm:justify-center sm:gap-2 scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {/* Home Link */}
           <li className="shrink-0">
             <NavLink

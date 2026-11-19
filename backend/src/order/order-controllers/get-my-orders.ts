@@ -18,9 +18,9 @@ async(
                 message:"Invalid user ID format"
             });
         }
-        const orders=await Order.find({userID:id})
-        .populate("userID","name")
-        .sort({createdAt:-1});
+        const orders = await Order.find({ userID: id })
+            .populate("items.productID", "name price imageUrl")
+            .sort({ createdAt: -1 });
         return res.status(StatusCodes.OK).json({
             message:"Orders fetched successfully",
             data:orders

@@ -5,6 +5,7 @@ import {
   Check,
   ChevronLeft,
   Minus,
+  MessageCircle,
   Package,
   Plus,
   RefreshCw,
@@ -20,6 +21,7 @@ import { useCartStore } from '../../cart/cart.store.ts'
 import { useCategories } from '../hooks/useCategories.ts'
 import { useProduct, useProductsByCategory } from '../hooks/useProducts.ts'
 import { formatEGP } from '../../../lib/formatters.ts'
+import { STORE_WHATSAPP_INTL } from '../../checkout/constants/egypt-regions.ts'
 
 export function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>()
@@ -459,6 +461,21 @@ export function ProductDetailPage() {
                     {isOutOfStock ? 'نفدت الكمية' : isAdded ? 'تمت الإضافة بنجاح ✓' : 'أضف للسلة'}
                   </Button>
                 </div>
+              </div>
+
+              {/* Quick WhatsApp Order Button */}
+              <div className="mt-3">
+                <a
+                  href={`https://wa.me/${STORE_WHATSAPP_INTL}?text=${encodeURIComponent(
+                    `مرحباً، أود طلب المنتج: *${product.name}* (الكمية: ${quantity}) بسعر إجمالي ${product.price * quantity} ج.م من المتجر.`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-sm bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200 transition-all cursor-pointer shadow-xs"
+                >
+                  <MessageCircle className="h-4 w-4 text-emerald-600" />
+                  <span>طلب فوري وسريع عبر الواتساب</span>
+                </a>
               </div>
             </div>
           </div>

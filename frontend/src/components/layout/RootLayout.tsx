@@ -2,8 +2,10 @@ import { useSyncExternalStore } from 'react'
 import { Outlet, ScrollRestoration } from 'react-router'
 import { Toaster } from 'sonner'
 import { CartDrawer } from '../../features/cart/CartDrawer.tsx'
+import { FloatingWhatsApp } from '../ui/FloatingWhatsApp.tsx'
 import { Footer } from './Footer.tsx'
 import { Header } from './Header.tsx'
+import { MobileBottomNav } from './MobileBottomNav.tsx'
 import { Navbar } from './Navbar.tsx'
 import { TopBar } from './TopBar.tsx'
 
@@ -36,11 +38,13 @@ export function RootLayout() {
       <TopBar />
       <Header />
       <Navbar />
-      <main className="flex-1">
+      <main className="flex-1 pb-16 sm:pb-0">
         <Outlet />
       </main>
       <Footer />
       <CartDrawer />
+      <FloatingWhatsApp />
+      <MobileBottomNav />
       <Toaster
         dir="rtl"
         position={isMobile ? 'bottom-center' : 'bottom-left'}

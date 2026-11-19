@@ -13,47 +13,94 @@ export enum Status {
     CANCELLED = "cancelled"
 }
 
-interface IOrder{
-    userID: mongoose.Types.ObjectId,
-    items: Iitem[],
-    totalPrice: number,
-    status: Status,
-    createdAt: Date,
-    updatedAt: Date
+export interface IShippingAddress {
+    city: string;
+    district?: string;
+    street: string;
+    notes?: string;
+}
+
+export type PaymentMethod = "cod" | "vodafone_cash" | "instapay" | "card" | "tabby" | "tamara";
+export type PaymentStatus = "unpaid" | "paid";
+
+export interface IOrder {
+    userID?: mongoose.Types.ObjectId;
+    customerName: string;
+    customerPhone: string;
+    shippingAddress: IShippingAddress;
+    items: Iitem[];
+    totalPrice: number;
+    shippingFee?: number;
+    paymentMethod: PaymentMethod;
+    paymentStatus: PaymentStatus;
+    status: Status;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 const OrderSchema = new mongoose.Schema<IOrder>({
     userID: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true
-},
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: false
+    },
+    customerName: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    customerPhone: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    shippingAddress: {
+        city: { type: String, required: true, trim: true },
+        district: { type: String, trim: true },
+        street: { type: String, required: true, trim: true },
+        notes: { type: String, trim: true }
+    },
     items: {
-    type: [
-        {
-            productID: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Product",
-                required: true
-            },
-            quantity: {
-                type: Number,
-                required: true,
-                min: 1
-            },
-            price: {
-                type: Number,
-                required: true,
-                min: 0
+        type: [
+            {
+                productID: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "Product",
+                    required: true
+                },
+                quantity: {
+                    type: Number,
+                    required: true,
+                    min: 1
+                },
+                price: {
+                    type: Number,
+                    required: true,
+                    min: 0
+                }
             }
-        }
-    ],
-    default: []
-},
+        ],
+        default: []
+    },
     totalPrice: {
         type: Number,
         required: true,
         min: [0, "Total price must be at least 0"]
+    },
+    shippingFee: {
+        type: Number,
+        default: 0,
+        min: 0
+    },
+    paymentMethod: {
+        type: String,
+        enum: ["cod", "vodafone_cash", "instapay", "card", "tabby", "tamara"],
+        default: "cod"
+    },
+    paymentStatus: {
+        type: String,
+        enum: ["unpaid", "paid"],
+        default: "unpaid"
     },
     status: {
         type: String,

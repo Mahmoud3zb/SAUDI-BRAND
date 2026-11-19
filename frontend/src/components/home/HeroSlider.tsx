@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Award, CheckCircle2, ShoppingCart, Truck } from 'lucide-react'
+import { Eye, MessageCircle, ShieldCheck, ShoppingCart, Sparkles, Truck } from 'lucide-react'
 import { Link } from 'react-router'
 import { useBanners } from '../../features/products/hooks/useBanners.ts'
 import { Button } from '../ui/Button.tsx'
+import { STORE_WHATSAPP_INTL } from '../../features/checkout/constants/egypt-regions.ts'
 
 export function HeroSlider() {
   const { data: banners } = useBanners()
@@ -12,114 +13,114 @@ export function HeroSlider() {
   const currentBanner = bannerList[currentIndex] ?? {
     id: 'banner-hero',
     title: 'سعودي براند',
-    subtitle: 'اختاري لمستك .. واكتشفي منتجاتك المفضلة',
+    subtitle: 'فخامة العطور وأسرار العناية الملكية بين يديكِ',
     imageUrl: '/newHero.png',
-    linkUrl: '/#offers',
+    linkUrl: '/products',
     textPosition: 'right',
   }
 
   const totalBanners = bannerList.length > 0 ? bannerList.length : 3
   const isTextOnLeft = currentBanner.textPosition === 'left'
-  const isNewHeroImage = currentBanner.imageUrl?.includes('newHero')
+
+  const whatsappHeroUrl = `https://wa.me/${STORE_WHATSAPP_INTL}?text=${encodeURIComponent(
+    'مرحباً، أود الاستفسار وطلب منتجات من سعودي براند ✨'
+  )}`
 
   return (
     <section
       aria-label="بانر العروض الرئيسي"
-      className="relative w-full overflow-hidden bg-[#F6EFE6] min-h-[500px] sm:min-h-[520px] lg:min-h-[580px] flex items-end md:items-center"
+      className="relative w-full overflow-hidden bg-[#F6EFE6] min-h-[520px] sm:min-h-[560px] lg:min-h-[600px] flex items-end md:items-center font-sans"
+      dir="rtl"
     >
       {/* Background Hero Image */}
       <div className="absolute inset-0 h-full w-full">
         <img
           src={currentBanner.imageUrl || '/newHero.png'}
-          alt={`${currentBanner.title} - العطور والعناية`}
-          className="h-full w-full object-cover object-[22%_15%] sm:object-[28%_center] md:object-center"
+          alt={`${currentBanner.title} - فخامة العطور والعناية`}
+          className="h-full w-full object-cover object-[24%_15%] sm:object-[28%_center] md:object-center"
           loading="eager"
         />
-        {/* Mobile: Atmospheric soft warm ivory gradient from bottom so model at top is crystal clear and text at bottom has perfect legibility */}
+        {/* Mobile atmospheric gradient */}
         <div
-          className="absolute inset-0 bg-gradient-to-t from-[#F6EFE6] from-15% via-[#F6EFE6]/85 via-45% to-transparent to-80% md:hidden"
+          className="absolute inset-0 bg-gradient-to-t from-[#F6EFE6] from-20% via-[#F6EFE6]/85 via-50% to-transparent to-85% md:hidden"
           aria-hidden="true"
         />
-        {/* Desktop: Soft side ambient gradient on the right (start) side behind the text */}
+        {/* Desktop ambient soft gradient */}
         <div
-          className="hidden md:block absolute inset-0 bg-gradient-to-l from-[#F6EFE6]/60 via-[#F6EFE6]/20 to-transparent"
+          className="hidden md:block absolute inset-0 bg-gradient-to-l from-[#F6EFE6]/70 via-[#F6EFE6]/30 to-transparent"
           aria-hidden="true"
         />
       </div>
 
       {/* Main Content Container */}
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-10 lg:px-16 pt-6 pb-8 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 items-start md:items-center min-h-0 md:min-h-[420px]">
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-10 lg:px-16 pt-6 pb-10 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 items-start md:items-center">
           {/* Main Text Block */}
           <div
             className={`flex flex-col items-center md:items-start text-center md:text-start ${
               isTextOnLeft ? 'md:order-2' : 'md:order-1'
             }`}
           >
-            {/* Brand Logo in Hero (Desktop only; on mobile, header already prominently displays the logo) */}
+            {/* Top Quality Badge */}
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-brand-soft-pink/90 border border-brand-primary/20 text-brand-primary text-xs font-bold mb-3 shadow-xs">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>الأصالة والفخامة في السوق المصري</span>
+            </div>
+
+            {/* Brand Logo in Hero (Desktop) */}
             <img
               src="/newLogo2.png"
               alt="سعودي براند | SAUDI BRAND"
-              className="hidden md:block h-24 lg:h-28 w-auto object-contain drop-shadow-xs mb-2 mx-auto md:mx-0"
+              className="hidden md:block h-20 lg:h-24 w-auto object-contain drop-shadow-xs mb-2 mx-auto md:mx-0"
             />
 
-            {/* Subtitle */}
-            {currentBanner.subtitle && (
-              <p className="text-sm sm:text-lg lg:text-xl text-[#3d2e2e] font-bold leading-relaxed max-w-xs sm:max-w-md drop-shadow-xs">
-                {currentBanner.subtitle}
-              </p>
-            )}
+            {/* Main Headline & Subtitle */}
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#2e1d15] leading-tight max-w-md">
+              فخامة العطور وأسرار العناية الملكية
+            </h1>
+            <p className="mt-2 text-xs sm:text-base text-[#4a3b32] font-semibold leading-relaxed max-w-xs sm:max-w-md">
+              تشكيلة مختارة بعناية لأرقى الماركات • حق المعاينة الكاملة لشحنتك قبل الدفع
+            </p>
 
-            {/* CTA Button */}
-            <div className="mt-3 sm:mt-6">
-              <Link to={currentBanner.linkUrl || '/#offers'}>
+            {/* Dual CTA Actions */}
+            <div className="mt-5 sm:mt-7 flex flex-wrap items-center justify-center md:justify-start gap-3 w-full sm:w-auto">
+              <Link to="/products" className="w-full sm:w-auto">
                 <Button
                   variant="primary"
                   size="lg"
-                  className="rounded-full px-7 py-2.5 sm:px-9 sm:py-3.5 text-xs sm:text-base font-bold shadow-md hover:shadow-lg transition-transform active:scale-95 flex items-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto rounded-full px-8 py-3 text-xs sm:text-sm font-bold shadow-md hover:shadow-xl transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <ShoppingCart className="h-4 w-4 sm:h-4.5 sm:w-4.5" aria-hidden="true" />
-                  <span>تسوقي الآن</span>
+                  <ShoppingCart className="h-4 w-4" aria-hidden="true" />
+                  <span>تسوقي التشكيلة الآن</span>
                 </Button>
               </Link>
+
+              <a
+                href={whatsappHeroUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all duration-200 cursor-pointer"
+              >
+                <MessageCircle className="h-4 w-4" />
+                <span>طلب واستشارة عبر الواتساب</span>
+              </a>
             </div>
 
-            {/* Trust Highlights Bar (Desktop only in hero to preserve clean portrait space on mobile) */}
-            <div className="hidden md:flex mt-8 flex-wrap items-center justify-start gap-4 text-xs font-semibold text-[#4a3b32] pt-3">
-              <div className="flex items-center gap-1.5">
-                <Award className="h-4 w-4 text-brand-primary shrink-0" aria-hidden="true" />
-                <span>منتجات أصلية</span>
+            {/* Trust Highlights Bar (Desktop) */}
+            <div className="hidden md:flex mt-8 flex-wrap items-center justify-start gap-3 text-xs font-semibold text-[#4a3b32] pt-4 border-t border-brand-primary/10">
+              <div className="flex items-center gap-1.5 bg-white/70 px-3 py-1.5 rounded-full border border-brand-soft-pink shadow-2xs">
+                <Eye className="h-3.5 w-3.5 text-brand-primary shrink-0" aria-hidden="true" />
+                <span>معاينة قبل الاستلام</span>
               </div>
-              <span className="h-3.5 w-px bg-gray-400/40" aria-hidden="true" />
-              <div className="flex items-center gap-1.5">
-                <Truck className="h-4 w-4 text-brand-primary shrink-0" aria-hidden="true" />
-                <span>توصيل سريع لجميع مناطق مصر</span>
+              <div className="flex items-center gap-1.5 bg-white/70 px-3 py-1.5 rounded-full border border-brand-soft-pink shadow-2xs">
+                <Truck className="h-3.5 w-3.5 text-brand-primary shrink-0" aria-hidden="true" />
+                <span>شحن سريع لمحافظات مصر</span>
               </div>
-              <span className="h-3.5 w-px bg-gray-400/40" aria-hidden="true" />
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-brand-primary shrink-0" aria-hidden="true" />
-                <span>دفع آمن</span>
+              <div className="flex items-center gap-1.5 bg-white/70 px-3 py-1.5 rounded-full border border-brand-soft-pink shadow-2xs">
+                <ShieldCheck className="h-3.5 w-3.5 text-brand-primary shrink-0" aria-hidden="true" />
+                <span>استرجاع واستبدال 14 يوم</span>
               </div>
             </div>
-          </div>
-
-          {/* Complementary Space on desktop */}
-          <div
-            className={`hidden md:flex flex-col items-center justify-center ${
-              isTextOnLeft ? 'md:order-1' : 'md:order-2'
-            }`}
-          >
-            {!isNewHeroImage && currentBanner.calloutText && (
-              <div className="select-none text-center transform -rotate-1 pe-12">
-                <span className="block text-xl lg:text-2xl font-black text-brand-secondary/90 tracking-wide drop-shadow-xs">
-                  جمالك ..
-                </span>
-                <span className="block text-xl lg:text-2xl font-black text-brand-secondary/90 mt-1 drop-shadow-xs">
-                  بكل تفاصيله
-                </span>
-                <span className="block text-2xl text-brand-primary mt-1 font-bold">♥</span>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -140,7 +141,7 @@ export function HeroSlider() {
             onClick={() => setCurrentIndex(index)}
             className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
               index === currentIndex
-                ? 'w-6 bg-brand-primary'
+                ? 'w-7 bg-brand-primary'
                 : 'w-2 bg-white/70 border border-white hover:bg-white'
             }`}
           />

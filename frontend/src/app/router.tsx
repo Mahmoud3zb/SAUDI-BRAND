@@ -3,6 +3,11 @@ import App from '../App.tsx'
 import { RootLayout } from '../components/layout/RootLayout.tsx'
 import { CatalogPage } from '../features/products/pages/CatalogPage.tsx'
 import { ProductDetailPage } from '../features/products/pages/ProductDetailPage.tsx'
+import { CheckoutPage } from '../features/checkout/pages/CheckoutPage.tsx'
+import { OrderSuccessPage } from '../features/checkout/pages/OrderSuccessPage.tsx'
+import { ShippingPolicyPage } from '../features/pages/ShippingPolicyPage.tsx'
+import { ReturnPolicyPage } from '../features/pages/ReturnPolicyPage.tsx'
+import { AboutUsPage } from '../features/pages/AboutUsPage.tsx'
 import { AdminRoute } from '../features/admin/components/AdminRoute.tsx'
 import { AdminLayout } from '../features/admin/components/AdminLayout.tsx'
 import { AdminLoginPage } from '../features/admin/pages/AdminLoginPage.tsx'
@@ -31,6 +36,26 @@ export const router = createBrowserRouter([
       {
         path: 'category/:categorySlug',
         element: <CatalogPage />,
+      },
+      {
+        path: 'checkout',
+        element: <CheckoutPage />,
+      },
+      {
+        path: 'order-success/:orderId',
+        element: <OrderSuccessPage />,
+      },
+      {
+        path: 'shipping-policy',
+        element: <ShippingPolicyPage />,
+      },
+      {
+        path: 'return-policy',
+        element: <ReturnPolicyPage />,
+      },
+      {
+        path: 'about-us',
+        element: <AboutUsPage />,
       },
     ],
   },

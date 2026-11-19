@@ -18,7 +18,8 @@ async (
         );
             const [orders, total] = await Promise.all([
                 Order.find()
-                    .populate("userID", "name")
+                    .populate("userID", "name email")
+                    .populate("items.productID", "name price imageUrl")
                     .sort({ createdAt: -1 })
                     .skip((page - 1) * limit)
                     .limit(limit),

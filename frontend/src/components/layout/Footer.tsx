@@ -1,13 +1,35 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
+import { MessageCircle, ShieldCheck, Truck } from 'lucide-react'
 import { Button } from '../ui/Button.tsx'
 import { Input } from '../ui/Input.tsx'
+import { STORE_WHATSAPP_INTL, STORE_WHATSAPP_NUMBER } from '../../features/checkout/constants/egypt-regions.ts'
 
 export function Footer() {
   const [email, setEmail] = useState('')
 
   return (
-    <footer className="mt-auto border-t border-gray-200 bg-white text-gray-600">
+    <footer className="mt-auto border-t border-gray-200 bg-white text-gray-600 font-sans" dir="rtl">
+      {/* Top Highlight Ribbon */}
+      <div className="border-b border-gray-100 bg-brand-soft-pink/30 py-4">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-semibold text-gray-700">
+            <div className="flex items-center gap-2">
+              <Truck className="h-4 w-4 text-brand-primary shrink-0" />
+              <span>شحن سريع لجميع محافظات مصر (معاينة قبل الدفع)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-brand-primary shrink-0" />
+              <span>استبدال واسترجاع مضمون خلال 14 يوماً</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <MessageCircle className="h-4 w-4 text-emerald-600 shrink-0" />
+              <span>خدمة عملاء وطلب سريع عبر الواتساب: {STORE_WHATSAPP_NUMBER}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* Brand Column */}
@@ -20,8 +42,9 @@ export function Footer() {
               />
             </Link>
             <p className="text-xs leading-relaxed text-gray-500">
-              وجهتكِ الأولى لأرقى العطور ومستحضرات العناية بالبشرة والشعر والهاند ميد والهدايا.
+              وجهتكِ الأولى في مصر لأرقى العطور ومستحضرات العناية بالبشرة والشعر والهدايا الاستثنائية.
             </p>
+            
           </div>
 
           {/* Quick Links */}
@@ -32,10 +55,18 @@ export function Footer() {
             <ul className="space-y-2 text-xs">
               <li>
                 <Link
+                  to="/products"
+                  className="transition-colors hover:text-brand-primary"
+                >
+                  جميع المنتجات
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/category/perfumes"
                   className="transition-colors hover:text-brand-primary"
                 >
-                  العطور
+                  العطور الفاخرة
                 </Link>
               </li>
               <li>
@@ -54,34 +85,39 @@ export function Footer() {
                   العناية بالشعر
                 </Link>
               </li>
-              <li>
-                <Link to="/category/gifts" className="transition-colors hover:text-brand-primary">
-                  الهدايا والعروض
-                </Link>
-              </li>
             </ul>
           </div>
 
-          {/* Customer Support */}
+          {/* Customer Support & Policies */}
           <div>
             <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-900">
-              خدمة العملاء
+              خدمة العملاء والسياسات
             </h3>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link to="/" className="transition-colors hover:text-brand-primary">
-                  الأسئلة الشائعة
+                <Link to="/shipping-policy" className="transition-colors hover:text-brand-primary font-medium">
+                  الشحن والتوصيل (المحافظات)
                 </Link>
               </li>
               <li>
-                <Link to="/" className="transition-colors hover:text-brand-primary">
-                  الشحن والتوصيل
+                <Link to="/return-policy" className="transition-colors hover:text-brand-primary font-medium">
+                  سياسة الاسترجاع والاستبدال (14 يوم)
                 </Link>
               </li>
               <li>
-                <Link to="/" className="transition-colors hover:text-brand-primary">
-                  سياسة الاسترجاع
+                <Link to="/about-us" className="transition-colors hover:text-brand-primary font-medium">
+                  عن سعودي براند
                 </Link>
+              </li>
+              <li>
+                <a
+                  href={`https://wa.me/${STORE_WHATSAPP_INTL}?text=${encodeURIComponent('مرحباً، أود التحدث مع خدمة العملاء.')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-emerald-700 text-emerald-600 font-bold"
+                >
+                  تواصل معنا عبر الواتساب
+                </a>
               </li>
             </ul>
           </div>
@@ -91,7 +127,7 @@ export function Footer() {
             <h3 className="text-xs font-bold uppercase tracking-wider text-gray-900">
               النشرة البريدية
             </h3>
-            <p className="text-xs text-gray-500">اشتركي ليصلكِ كل جديد عن أحدث العروض والمنتجات.</p>
+            <p className="text-xs text-gray-500">اشتركي ليصلكِ كل جديد عن أحدث العروض والخصومات في مصر.</p>
             <form
               onSubmit={(e) => e.preventDefault()}
               className="flex flex-col gap-2 sm:flex-row sm:items-center"
@@ -112,8 +148,15 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-10 border-t border-gray-100 pt-6 text-center text-xs text-gray-400">
-          <p>© {new Date().getFullYear()} سعودي براند. جميع الحقوق محفوظة.</p>
+        <div className="mt-10 border-t border-gray-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
+          <p>© {new Date().getFullYear()} سعودي براند - جمهورية مصر العربية. جميع الحقوق محفوظة.</p>
+          <div className="flex items-center gap-4 text-[11px]">
+            <Link to="/shipping-policy" className="hover:text-gray-600">الشحن</Link>
+            <span>•</span>
+            <Link to="/return-policy" className="hover:text-gray-600">الاسترجاع</Link>
+            <span>•</span>
+            <Link to="/about-us" className="hover:text-gray-600">من نحن</Link>
+          </div>
         </div>
       </div>
     </footer>

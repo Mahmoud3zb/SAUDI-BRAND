@@ -6,6 +6,7 @@ import {
   ChevronUp,
   Clock,
   Loader2,
+  MessageCircle,
   ShoppingBag,
   Search,
   Truck,
@@ -59,6 +60,8 @@ export function AdminOrdersPage() {
     return (
       matchesStatus &&
       (order._id.toLowerCase().includes(searchLower) ||
+        (order.customerName && order.customerName.toLowerCase().includes(searchLower)) ||
+        (order.customerPhone && order.customerPhone.includes(searchLower)) ||
         (user?.name && user.name.toLowerCase().includes(searchLower)) ||
         (user?.email && user.email.toLowerCase().includes(searchLower)))
     )
@@ -159,8 +162,23 @@ export function AdminOrdersPage() {
                         </span>
                       </div>
                       <div className="text-[11px] text-gray-500 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <span>العميل: {user?.name || 'غير معروف'}</span>
-                        {user?.email && <span>{user.email}</span>}
+                        <span>العميل: <strong className="text-gray-800">{order.customerName || user?.name || 'زائر'}</strong></span>
+                        {order.customerPhone && (
+                          <span className="flex items-center gap-1.5 font-mono">
+                            <span>📱 {order.customerPhone}</span>
+                            <a
+                              href={`https://wa.me/20${order.customerPhone.replace(/^0+/, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200 font-bold hover:bg-emerald-100 transition-colors"
+                              title="مراسلة على الواتساب"
+                            >
+                              <MessageCircle className="h-3 w-3" />
+                              <span>واتساب</span>
+                            </a>
+                          </span>
+                        )}
+                        {order.shippingAddress?.city && <span>📍 {order.shippingAddress.city}</span>}
                         <span>
                           {order.createdAt
                             ? new Date(order.createdAt).toLocaleDateString('ar-EG')
@@ -246,6 +264,28 @@ export function AdminOrdersPage() {
                         )
                       })}
                     </div>
+
+                    {order.shippingAddress && (
+                      <div className="bg-white p-3.5 rounded-xl border border-gray-100 text-xs text-gray-700 space-y-1">
+                        <p className="font-bold text-gray-900">بيانات الشحن والتوصيل:</p>
+                        <p>📍 المدينة: {order.shippingAddress.city} {order.shippingAddress.district ? `- حي ${order.shippingAddress.district}` : ''}</p>
+                        <p>🏠 العنوان: {order.shippingAddress.street}</p>
+                        {order.customerPhone && <p>📞 الجوال: {order.customerPhone}</p>}
+                        {order.shippingAddress.notes && <p className="text-gray-500 italic">ملاحظات: {order.shippingAddress.notes}</p>}
+                        {order.paymentMethod && (
+                          <p className="text-brand-primary font-bold">
+                            طريقة الدفع:{' '}
+                            {order.paymentMethod === 'vodafone_cash'
+                              ? 'فودافون كاش'
+                              : order.paymentMethod === 'instapay'
+                              ? 'انستاباي InstaPay'
+                              : order.paymentMethod === 'cod'
+                              ? 'الدفع عند الاستلام'
+                              : order.paymentMethod}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

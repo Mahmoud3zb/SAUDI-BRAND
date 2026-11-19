@@ -1,44 +1,62 @@
-import { Gift, Headphones, ShieldCheck, Truck } from 'lucide-react'
+import { Eye, MessageCircle, RefreshCw, Truck } from 'lucide-react'
+import { STORE_WHATSAPP_NUMBER } from '../../features/checkout/constants/egypt-regions.ts'
 
-const TRUST_ITEMS = [
+const TRUST_FEATURES = [
+  {
+    icon: <Eye className="h-6 w-6 text-brand-primary" aria-hidden="true" />,
+    title: 'حق المعاينة قبل الدفع',
+    description: 'افتحي الشحنة وتأكدي من كل منتج أمام المندوب قبل سداد أي مليم.',
+    tag: 'راحة وأمان 100%',
+  },
   {
     icon: <Truck className="h-6 w-6 text-brand-primary" aria-hidden="true" />,
-    title: 'توصيل سريع',
-    description: 'شحن لجميع المحافظات بأعلى سرعة',
+    title: 'توصيل لجميع المحافظات',
+    description: 'القاهرة 100 ج.م • الدلتا 80 ج.م • الصعيد 60 ج.م في 2-4 أيام.',
+    tag: 'تسليم حتى باب البيت',
   },
   {
-    icon: <ShieldCheck className="h-6 w-6 text-brand-primary" aria-hidden="true" />,
-    title: 'منتجات أصلية ومضمونة',
-    description: 'جودة موثوقة ومختارة بعناية',
+    icon: <RefreshCw className="h-6 w-6 text-brand-primary" aria-hidden="true" />,
+    title: 'استبدال واسترجاع 14 يوم',
+    description: 'ضمان كامل لحقوقكِ في الاستبدال أو الاسترجاع بكل سهولة ويسر.',
+    tag: 'ضمان حماية المستهلك',
   },
   {
-    icon: <Headphones className="h-6 w-6 text-brand-primary" aria-hidden="true" />,
-    title: 'خدمة عملاء مستمرة',
-    description: 'دعم دائم للإجابة على استفساراتكِ',
-  },
-  {
-    icon: <Gift className="h-6 w-6 text-brand-primary" aria-hidden="true" />,
-    title: 'تغليف هدايا فاخر',
-    description: 'لمسات خاصة وتغليف أنيق لمناسباتكِ',
+    icon: <MessageCircle className="h-6 w-6 text-emerald-600" aria-hidden="true" />,
+    title: 'دعم ومتابعة واتساب',
+    description: `فريق خدمة العملاء متواجد لمساعدتكِ يومياً على ${STORE_WHATSAPP_NUMBER}.`,
+    tag: 'رد فوري خلال دقائق',
   },
 ]
 
 export function TrustBadges() {
   return (
-    <section aria-label="مميزات المتجر" className="py-2">
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        {TRUST_ITEMS.map((item, index) => (
+    <section aria-label="ضمانات ومميزات المتجر" className="py-4 font-sans" dir="rtl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {TRUST_FEATURES.map((item, index) => (
           <div
             key={index}
-            className="flex flex-col items-center rounded-2xl border border-gray-100 bg-white p-5 text-center shadow-xs transition hover:border-brand-soft-pink"
+            className="group flex flex-col justify-between rounded-3xl border border-gray-100 bg-white p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-brand-soft-pink transition-all duration-300 relative overflow-hidden"
           >
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-soft-pink/60">
-              {item.icon}
+            {/* Ambient accent top bar */}
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-brand-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-soft-pink/60 transition-transform duration-300 group-hover:scale-110">
+                  {item.icon}
+                </div>
+                <span className="text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">
+                  {item.tag}
+                </span>
+              </div>
+
+              <h3 className="text-xs sm:text-sm font-black text-gray-900 group-hover:text-brand-primary transition-colors">
+                {item.title}
+              </h3>
+              <p className="mt-1.5 text-[11px] sm:text-xs text-gray-500 leading-relaxed font-medium">
+                {item.description}
+              </p>
             </div>
-            <h3 className="text-xs font-bold text-gray-900 sm:text-sm">{item.title}</h3>
-            <p className="mt-1 text-[11px] text-gray-500 sm:text-xs leading-relaxed">
-              {item.description}
-            </p>
           </div>
         ))}
       </div>

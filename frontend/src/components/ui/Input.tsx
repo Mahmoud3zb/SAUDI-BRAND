@@ -25,7 +25,7 @@ export function Input({
   const describedBy = errorId || helperId || undefined
 
   const baseInputClasses =
-    'w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:outline-none focus:ring-2 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed'
+    'w-full rounded-xl border bg-white px-3.5 py-2.5 text-base sm:text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:outline-none focus:ring-2 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed'
 
   const stateClasses = error
     ? 'border-red-400 focus:border-red-500 focus:ring-red-100'

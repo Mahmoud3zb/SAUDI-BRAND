@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Check, Package, ShoppingBag, Star } from 'lucide-react'
+import { Check, MessageCircle, Package, ShoppingBag, Star } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { useCartStore } from '../../features/cart/cart.store.ts'
@@ -7,6 +7,7 @@ import { formatEGP } from '../../lib/formatters.ts'
 import type { Product } from '../../types/index.ts'
 import { Badge } from '../ui/Badge.tsx'
 import { Button } from '../ui/Button.tsx'
+import { STORE_WHATSAPP_INTL } from '../../features/checkout/constants/egypt-regions.ts'
 
 export interface ProductCardProps {
   product: Product
@@ -34,7 +35,6 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
 
-    // Prevent duplicate triggers from rapid consecutive clicks
     if (isProcessingRef.current) return
     isProcessingRef.current = true
     setTimeout(() => {
@@ -66,23 +66,28 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
   const handleCardClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement
-    if (target.closest('button')) return
+    if (target.closest('button') || target.closest('a')) return
     navigate(`/products/${product.id}`)
   }
+
+  const quickWaText = encodeURIComponent(
+    `مرحباً، أود طلب المنتج: *${product.name}* بسعر ${product.price} ج.م من المتجر.`
+  )
+  const quickWaUrl = `https://wa.me/${STORE_WHATSAPP_INTL}?text=${quickWaText}`
 
   return (
     <article
       onClick={handleCardClick}
-      className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all duration-200 hover:border-brand-soft-pink hover:shadow-md"
+      className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-gray-100/90 bg-white shadow-2xs transition-all duration-300 hover:-translate-y-1 hover:border-brand-soft-pink hover:shadow-xl"
     >
-      {/* Product Image / Visual Placeholder */}
-      <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-brand-soft-pink/40 to-white">
+      {/* Product Image Container */}
+      <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-brand-soft-pink/30 via-white to-brand-soft-pink/20">
         {product.imageUrl && !imageError ? (
           <img
             src={product.imageUrl}
             alt={product.name}
             onError={() => setImageError(true)}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-108"
             loading="lazy"
           />
         ) : (
@@ -91,12 +96,12 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           </div>
         )}
 
-        {/* Top Badges: Discount & Stock */}
+        {/* Top Badges */}
         <div className="absolute inset-x-2.5 top-2.5 flex items-center justify-between gap-1.5 pointer-events-none">
           {hasDiscount ? (
-            <Badge variant="primary" size="sm">
-              خصم {discountPercent}%
-            </Badge>
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-600 text-white shadow-xs">
+              وفر {discountPercent}%
+            </span>
           ) : (
             <span />
           )}
@@ -121,8 +126,8 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         {product.rating && (
           <div className="mb-1.5 flex items-center gap-1 text-xs text-amber-500">
             <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden="true" />
-            <span className="font-semibold">{product.rating.score.toFixed(1)}</span>
-            <span className="text-[11px] text-gray-400">({product.rating.count})</span>
+            <span className="font-bold">{product.rating.score.toFixed(1)}</span>
+            <span className="text-[11px] text-gray-400 font-medium">({product.rating.count})</span>
           </div>
         )}
 
@@ -131,55 +136,63 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           to={`/products/${product.id}`}
           className="focus-visible:outline-none focus-visible:underline"
         >
-          <h3 className="line-clamp-2 text-sm font-bold text-gray-900 transition-colors group-hover:text-brand-primary">
+          <h3 className="line-clamp-2 text-xs sm:text-sm font-bold text-gray-900 transition-colors group-hover:text-brand-primary leading-snug">
             {product.name}
           </h3>
         </Link>
 
         {/* Short Description */}
         {product.description && (
-          <p className="mt-1 line-clamp-2 text-xs text-gray-500 leading-relaxed">
+          <p className="mt-1 line-clamp-2 text-[11px] text-gray-400 leading-relaxed">
             {product.description}
           </p>
         )}
 
         {/* Price & Action Container */}
-        <div className="mt-auto pt-3">
+        <div className="mt-auto pt-3 border-t border-gray-50">
           <div className="mb-3 flex items-baseline gap-2">
-            <span className="text-base font-extrabold text-brand-primary">
+            <span className="text-base font-black text-brand-primary">
               {formatEGP(product.price)}
             </span>
             {hasDiscount && (
-              <span className="text-xs text-gray-400 line-through">
+              <span className="text-xs text-gray-400 line-through font-medium">
                 {formatEGP(product.originalPrice!)}
               </span>
             )}
           </div>
 
-          <Button
-            variant={isAdded ? 'secondary' : 'primary'}
-            size="sm"
-            className="w-full transition-all"
-            disabled={isOutOfStock}
-            leftIcon={
-              isAdded ? (
-                <Check className="h-3.5 w-3.5 text-brand-primary" aria-hidden="true" />
-              ) : (
-                <ShoppingBag className="h-3.5 w-3.5" aria-hidden="true" />
-              )
-            }
-            onClick={handleAddToCart}
-            aria-live="polite"
-            aria-label={
-              isOutOfStock
-                ? `${product.name} غير متوفر`
-                : isAdded
-                  ? `تمت إضافة ${product.name} إلى السلة`
-                  : `أضف ${product.name} إلى السلة`
-            }
-          >
-            {isOutOfStock ? 'غير متوفر' : isAdded ? 'تمت الإضافة ✓' : 'أضف إلى السلة'}
-          </Button>
+          <div className="flex items-center gap-1.5">
+            {/* Primary Add to Cart */}
+            <Button
+              variant={isAdded ? 'secondary' : 'primary'}
+              size="sm"
+              className="flex-1 font-bold text-xs py-2 transition-all cursor-pointer shadow-xs"
+              disabled={isOutOfStock}
+              leftIcon={
+                isAdded ? (
+                  <Check className="h-3.5 w-3.5 text-brand-primary" aria-hidden="true" />
+                ) : (
+                  <ShoppingBag className="h-3.5 w-3.5" aria-hidden="true" />
+                )
+              }
+              onClick={handleAddToCart}
+            >
+              {isOutOfStock ? 'غير متوفر' : isAdded ? 'تمت الإضافة ✓' : 'أضف للسلة'}
+            </Button>
+
+            {/* Quick WhatsApp Order Icon Button */}
+            <a
+              href={quickWaUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              title="طلب سريع ومباشر عبر الواتساب"
+              aria-label={`طلب ${product.name} عبر الواتساب`}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-all border border-emerald-200 shadow-2xs cursor-pointer"
+            >
+              <MessageCircle className="h-4 w-4" />
+            </a>
+          </div>
         </div>
       </div>
     </article>
