@@ -59,11 +59,15 @@ async function connectDB() {
     if (isConnected || mongoose.connection.readyState >= 1) {
         return;
     }
-    if (!URI || !DB_NAME) {
+    const dbUrl = process.env.DB_URL || URI;
+    const dbName = process.env.DB_NAME || DB_NAME;
+
+    if (!dbUrl || !dbName) {
         throw new Error("DB_URL or DB_NAME is missing in environment variables");
     }
-    await mongoose.connect(URI, {
-        dbName: DB_NAME
+    await mongoose.connect(dbUrl, {
+        dbName: dbName,
+        serverSelectionTimeoutMS: 5000, // Fail fast in 5s instead of hanging on serverless
     });
     isConnected = true;
     console.log("MongoDB connected successfully");
@@ -113,9 +117,15 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
         next();
     } catch (err: any) {
         console.error("Database connection failure:", err.message);
+        const hasDbUrl = Boolean(process.env.DB_URL);
         res.status(503).json({
             error: "Database Connection Error",
-            message: "Unable to connect to MongoDB. Please make sure DB_URL and DB_NAME are configured in environment variables.",
+            message: "Unable to connect to MongoDB.",
+            details: err?.message || String(err),
+            hasEnvDbUrl: hasDbUrl,
+            hint: !hasDbUrl
+                ? "DB_URL is missing in Vercel Environment Variables. Please add it and Redeploy."
+                : "DB_URL is set, but MongoDB cluster rejected the connection. Please open MongoDB Atlas -> Network Access -> Add IP Address -> Allow Access from Anywhere (0.0.0.0/0).",
         });
     }
 });
