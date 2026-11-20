@@ -24,8 +24,7 @@ const URI = process.env.DB_URL;
 const DB_NAME = process.env.DB_NAME;
 
 if (!URI || !DB_NAME) {
-    console.error("FATAL ERROR: DB_URL or DB_NAME is not defined in .env");
-    process.exit(1);
+    console.warn("⚠️ Warning: DB_URL or DB_NAME is not defined in environment variables");
 }
 
 async function ensureAdminUser() {
@@ -55,18 +54,28 @@ async function ensureAdminUser() {
     }
 }
 
-mongoose
-    .connect(URI, {
+let isConnected = false;
+async function connectDB() {
+    if (isConnected || mongoose.connection.readyState >= 1) {
+        return;
+    }
+    if (!URI || !DB_NAME) {
+        throw new Error("DB_URL or DB_NAME is missing in environment variables");
+    }
+    await mongoose.connect(URI, {
         dbName: DB_NAME
-    })
-    .then(async () => {
-        console.log("MongoDB connected successfully");
-        await ensureAdminUser();
-    })
-    .catch((err) => {
-        console.error("MongoDB connection error:", err);
-        process.exit(1);
     });
+    isConnected = true;
+    console.log("MongoDB connected successfully");
+    await ensureAdminUser();
+}
+
+// Connect immediately if running as a persistent server
+if (!process.env.VERCEL) {
+    connectDB().catch((err) => {
+        console.error("MongoDB initial connection error:", err);
+    });
+}
 
 app.use(helmet());
 
@@ -96,6 +105,21 @@ app.use(
 app.use(cookieParser());
 app.use(express.static("public"));
 app.use(express.json());
+
+// Ensure MongoDB is connected before handling requests (especially for Serverless environments like Vercel)
+app.use(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await connectDB();
+        next();
+    } catch (err: any) {
+        console.error("Database connection failure:", err.message);
+        res.status(503).json({
+            error: "Database Connection Error",
+            message: "Unable to connect to MongoDB. Please make sure DB_URL and DB_NAME are configured in environment variables.",
+        });
+    }
+});
+
 // API Routes
 
 app.use("/api/user",userRouter)
@@ -120,17 +144,20 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     });
 });
 
-const server = app.listen(PORT, "0.0.0.0", () => {
-    console.log(`✅ Server is running on http://localhost:${PORT}`);
-});
-
-
-process.on("SIGTERM", async () => {
-    console.log("SIGTERM received. Shutting down gracefully...");
-    server.close(async () => {
-        console.log("HTTP server closed.");
-        await mongoose.connection.close();
-        console.log("MongoDB connection closed.");
-        process.exit(0);
+if (!process.env.VERCEL && process.env.NODE_ENV !== "test") {
+    const server = app.listen(PORT, "0.0.0.0", () => {
+        console.log(`✅ Server is running on http://localhost:${PORT}`);
     });
-});
+
+    process.on("SIGTERM", async () => {
+        console.log("SIGTERM received. Shutting down gracefully...");
+        server.close(async () => {
+            console.log("HTTP server closed.");
+            await mongoose.connection.close();
+            console.log("MongoDB connection closed.");
+            process.exit(0);
+        });
+    });
+}
+
+export default app;
