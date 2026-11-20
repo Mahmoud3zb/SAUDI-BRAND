@@ -78,7 +78,10 @@ const allowedOrigins = process.env.FRONTEND_URL
 app.use(
     cors({
         origin: (origin, callback) => {
-            if (!origin || allowedOrigins.includes(origin) || /^http:\/\/localhost:\d+$/.test(origin) || /^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) {
+            const isVercel = origin ? /\.vercel\.app$/i.test(origin) : false;
+            const isLocal = origin ? (/^http:\/\/localhost:\d+$/.test(origin) || /^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) : false;
+            
+            if (!origin || allowedOrigins.includes(origin) || isVercel || isLocal) {
                 callback(null, true);
             } else {
                 callback(new Error("Not allowed by CORS"));
