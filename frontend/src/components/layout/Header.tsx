@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, Package, Search, SearchX, ShoppingBag, User, X } from 'lucide-react'
+import { ArrowLeft, Package, Search, SearchX, ShoppingBag, X } from 'lucide-react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { useCartStore, useCartTotalQuantity } from '../../features/cart/cart.store.ts'
 import { useCategories } from '../../features/products/hooks/useCategories.ts'
@@ -243,14 +243,6 @@ export function Header() {
             <Button
               variant="ghost"
               size="sm"
-              aria-label="حسابي"
-              className="p-2 text-gray-700 hover:text-brand-primary"
-            >
-              <User className="h-5 w-5" aria-hidden="true" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
               onClick={openCart}
               aria-label={`سلة المشتريات (${totalQuantity} منتجات)`}
               className="relative p-2 text-gray-700 hover:text-brand-primary cursor-pointer"
@@ -383,15 +375,6 @@ export function Header() {
 
         {/* Desktop action buttons */}
         <div className="hidden items-center gap-3 sm:flex">
-          <Button
-            variant="ghost"
-            size="md"
-            leftIcon={<User className="h-4 w-4" aria-hidden="true" />}
-            aria-label="تسجيل الدخول إلى حسابي"
-          >
-            حسابي
-          </Button>
-
           <Button
             variant="secondary"
             size="md"

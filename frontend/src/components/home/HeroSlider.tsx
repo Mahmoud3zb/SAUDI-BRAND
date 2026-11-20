@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { Eye, MessageCircle, ShieldCheck, ShoppingCart, Sparkles, Truck } from 'lucide-react'
+import { Eye, ShieldCheck, ShoppingCart, Truck } from 'lucide-react'
 import { Link } from 'react-router'
 import { useBanners } from '../../features/products/hooks/useBanners.ts'
 import { Button } from '../ui/Button.tsx'
-import { STORE_WHATSAPP_INTL } from '../../features/checkout/constants/egypt-regions.ts'
 
 export function HeroSlider() {
   const { data: banners } = useBanners()
@@ -21,10 +20,6 @@ export function HeroSlider() {
 
   const totalBanners = bannerList.length > 0 ? bannerList.length : 3
   const isTextOnLeft = currentBanner.textPosition === 'left'
-
-  const whatsappHeroUrl = `https://wa.me/${STORE_WHATSAPP_INTL}?text=${encodeURIComponent(
-    'مرحباً، أود الاستفسار وطلب منتجات من سعودي براند ✨'
-  )}`
 
   return (
     <section
@@ -61,12 +56,6 @@ export function HeroSlider() {
               isTextOnLeft ? 'md:order-2' : 'md:order-1'
             }`}
           >
-            {/* Top Quality Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-brand-soft-pink/90 border border-brand-primary/20 text-brand-primary text-xs font-bold mb-3 shadow-xs">
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>الأصالة والفخامة في السوق المصري</span>
-            </div>
-
             {/* Brand Logo in Hero (Desktop) */}
             <img
               src="/newLogo2.png"
@@ -82,28 +71,18 @@ export function HeroSlider() {
               تشكيلة مختارة بعناية لأرقى الماركات • حق المعاينة الكاملة لشحنتك قبل الدفع
             </p>
 
-            {/* Dual CTA Actions */}
-            <div className="mt-5 sm:mt-7 flex flex-wrap items-center justify-center md:justify-start gap-3 w-full sm:w-auto">
+            {/* Primary Action Button */}
+            <div className="mt-5 sm:mt-7 flex items-center justify-center md:justify-start w-full sm:w-auto">
               <Link to="/products" className="w-full sm:w-auto">
                 <Button
                   variant="primary"
                   size="lg"
-                  className="w-full sm:w-auto rounded-full px-8 py-3 text-xs sm:text-sm font-bold shadow-md hover:shadow-xl transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto rounded-full px-10 py-3.5 text-xs sm:text-sm font-bold shadow-md hover:shadow-xl transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <ShoppingCart className="h-4 w-4" aria-hidden="true" />
                   <span>تسوقي التشكيلة الآن</span>
                 </Button>
               </Link>
-
-              <a
-                href={whatsappHeroUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all duration-200 cursor-pointer"
-              >
-                <MessageCircle className="h-4 w-4" />
-                <span>طلب واستشارة عبر الواتساب</span>
-              </a>
             </div>
 
             {/* Trust Highlights Bar (Desktop) */}

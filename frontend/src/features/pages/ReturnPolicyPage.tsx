@@ -1,6 +1,6 @@
 import { CheckCircle2, MessageCircle, RefreshCw, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router'
-import { STORE_WHATSAPP_INTL, STORE_WHATSAPP_NUMBER } from '../checkout/constants/egypt-regions.ts'
+import { STORE_WHATSAPP_INTL} from '../checkout/constants/egypt-regions.ts'
 
 export function ReturnPolicyPage() {
   return (
@@ -95,7 +95,7 @@ export function ReturnPolicyPage() {
             className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors shrink-0"
           >
             <MessageCircle className="h-4 w-4" />
-            <span>طلب استبدال عبر الواتساب: {STORE_WHATSAPP_NUMBER}</span>
+            
           </a>
         </div>
       </div>

@@ -14,7 +14,7 @@ export function FloatingWhatsApp() {
       {showTooltip && (
         <div className="relative flex items-center gap-2 rounded-2xl bg-white px-3 py-1.5 sm:px-3.5 sm:py-2 text-[11px] sm:text-xs font-bold text-gray-800 shadow-xl border border-gray-100 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-          <span>تحدث معنا مباشرة على الواتساب 💬</span>
+          <span>💬</span>
           <button
             onClick={() => setShowTooltip(false)}
             className="ms-1 text-gray-400 hover:text-gray-600 cursor-pointer p-0.5 rounded-full hover:bg-gray-100"

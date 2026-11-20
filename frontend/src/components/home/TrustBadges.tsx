@@ -11,7 +11,6 @@ const TRUST_FEATURES = [
   {
     icon: <Truck className="h-6 w-6 text-brand-primary" aria-hidden="true" />,
     title: 'توصيل لجميع المحافظات',
-    description: 'القاهرة 100 ج.م • الدلتا 80 ج.م • الصعيد 60 ج.م في 2-4 أيام.',
     tag: 'تسليم حتى باب البيت',
   },
   {
