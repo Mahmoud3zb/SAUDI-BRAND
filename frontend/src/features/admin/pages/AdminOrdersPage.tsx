@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   CheckCircle,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ChevronUp,
   Clock,
   Download,
@@ -46,6 +48,9 @@ export function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [selectedWaybill, setSelectedWaybill] = useState<AdminOrder | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(15)
+  const ordersContainerRef = useRef<HTMLDivElement>(null)
 
   const whatsappNumber = useSettingsStore((state) => state.whatsappNumber)
 
@@ -80,6 +85,18 @@ export function AdminOrdersPage() {
         (user?.email && user.email.toLowerCase().includes(searchLower)))
     )
   })
+
+  const totalOrders = filteredOrders.length
+  const totalPages = Math.max(1, Math.ceil(totalOrders / pageSize))
+  const safeCurrentPage = Math.min(currentPage, totalPages)
+  const startIndex = (safeCurrentPage - 1) * pageSize
+  const endIndex = Math.min(startIndex + pageSize, totalOrders)
+  const paginatedOrders = filteredOrders.slice(startIndex, endIndex)
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage)
+    ordersContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   // Permission guard
   if (!isSuperAdmin() && !hasPermission('manage_orders')) {
@@ -174,7 +191,10 @@ export function AdminOrdersPage() {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setCurrentPage(1)
+            }}
             placeholder="ابحث برقم الطلب أو اسم العميل أو بريده..."
             className="w-full text-xs sm:text-sm bg-transparent outline-hidden text-gray-800 placeholder-gray-400"
           />
@@ -183,7 +203,10 @@ export function AdminOrdersPage() {
         {/* Status Filter Chips */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
           <button
-            onClick={() => setStatusFilter('all')}
+            onClick={() => {
+              setStatusFilter('all')
+              setCurrentPage(1)
+            }}
             className={`px-3 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer shrink-0 ${
               statusFilter === 'all'
                 ? 'bg-brand-primary text-white shadow-xs'
@@ -195,7 +218,10 @@ export function AdminOrdersPage() {
           {(['pending', 'confirmed', 'completed', 'cancelled'] as const).map((st) => (
             <button
               key={st}
-              onClick={() => setStatusFilter(st)}
+              onClick={() => {
+                setStatusFilter(st)
+                setCurrentPage(1)
+              }}
               className={`px-3 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer shrink-0 ${
                 statusFilter === st
                   ? 'bg-brand-primary text-white shadow-xs'
@@ -209,7 +235,7 @@ export function AdminOrdersPage() {
       </div>
 
       {/* Orders List */}
-      <div className="space-y-3">
+      <div ref={ordersContainerRef} className="space-y-3">
         {isLoading ? (
           <div className="bg-white rounded-2xl p-12 text-center text-gray-400 flex flex-col items-center gap-2 border border-gray-100">
             <Loader2 className="h-6 w-6 animate-spin text-brand-primary" />
@@ -221,7 +247,7 @@ export function AdminOrdersPage() {
             <span className="text-xs">لا توجد طلبات تطابق بحثك</span>
           </div>
         ) : (
-          filteredOrders.map((order) => {
+          paginatedOrders.map((order) => {
             const user =
               typeof order.userID === 'object' && order.userID !== null ? order.userID : null
             const isExpanded = expandedId === order._id
@@ -392,6 +418,65 @@ export function AdminOrdersPage() {
           })
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {totalOrders > 0 && (
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4 font-sans text-xs">
+          {/* Orders Count Range */}
+          <div className="text-gray-500 font-medium">
+            عرض <strong className="text-gray-900 font-bold">{startIndex + 1}</strong> إلى{' '}
+            <strong className="text-gray-900 font-bold">{endIndex}</strong> من إجمالي{' '}
+            <strong className="text-gray-900 font-bold">{totalOrders}</strong> طلب
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Page Size Selector */}
+            <div className="flex items-center gap-1.5 text-gray-500">
+              <span>عرض:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value))
+                  setCurrentPage(1)
+                }}
+                className="bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-1 text-xs font-bold text-gray-700 outline-none focus:border-brand-primary cursor-pointer"
+              >
+                <option value={10}>10 في الصفحة</option>
+                <option value={15}>15 في الصفحة</option>
+                <option value={25}>25 في الصفحة</option>
+                <option value={50}>50 في الصفحة</option>
+              </select>
+            </div>
+
+            {/* Navigation Buttons */}
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => handlePageChange(Math.max(1, safeCurrentPage - 1))}
+                disabled={safeCurrentPage <= 1}
+                className="p-1.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                title="الصفحة السابقة"
+                aria-label="الصفحة السابقة"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+
+              <span className="px-3 py-1 font-bold text-xs bg-brand-soft-pink text-brand-primary rounded-xl">
+                صفحة {safeCurrentPage} من {totalPages}
+              </span>
+
+              <button
+                onClick={() => handlePageChange(Math.min(totalPages, safeCurrentPage + 1))}
+                disabled={safeCurrentPage >= totalPages}
+                className="p-1.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                title="الصفحة التالية"
+                aria-label="الصفحة التالية"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Printable Shipping Waybill Slip Modal */}
       {selectedWaybill && (

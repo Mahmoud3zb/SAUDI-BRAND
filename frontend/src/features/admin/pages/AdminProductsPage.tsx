@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { AlertTriangle, Check, Copy, Edit2, Link as LinkIcon, Package, Plus, Star, Trash2, Upload, X } from 'lucide-react'
+import { AlertTriangle, Check, ChevronLeft, ChevronRight, Copy, Edit2, Link as LinkIcon, Package, Plus, Star, Trash2, Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '../../../components/ui/Button.tsx'
 import { Input } from '../../../components/ui/Input.tsx'
@@ -16,6 +16,8 @@ export function AdminProductsPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<AdminProduct | null>(null)
   const [productToDelete, setProductToDelete] = useState<AdminProduct | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   // Form State
   const [name, setName] = useState('')
@@ -41,6 +43,13 @@ export function AdminProductsPage() {
 
   const products = productsData?.data || []
   const categories = categoriesData?.data || []
+
+  const totalProducts = products.length
+  const totalPages = Math.max(1, Math.ceil(totalProducts / pageSize))
+  const safeCurrentPage = Math.min(currentPage, totalPages)
+  const startIndex = (safeCurrentPage - 1) * pageSize
+  const endIndex = Math.min(startIndex + pageSize, totalProducts)
+  const paginatedProducts = products.slice(startIndex, endIndex)
 
   // Delete product mutation
   const deleteMutation = useMutation({
@@ -206,7 +215,7 @@ export function AdminProductsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {products.map((p) => {
+                {paginatedProducts.map((p) => {
                   const catName =
                     typeof p.categoryID === 'object' && p.categoryID !== null
                       ? p.categoryID.name
@@ -308,6 +317,61 @@ export function AdminProductsPage() {
           </div>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {totalProducts > 0 && (
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4 font-sans text-xs">
+          <div className="text-gray-500 font-medium">
+            عرض <strong className="text-gray-900 font-bold">{startIndex + 1}</strong> إلى{' '}
+            <strong className="text-gray-900 font-bold">{endIndex}</strong> من إجمالي{' '}
+            <strong className="text-gray-900 font-bold">{totalProducts}</strong> منتج
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5 text-gray-500">
+              <span>عرض:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value))
+                  setCurrentPage(1)
+                }}
+                className="bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-1 text-xs font-bold text-gray-700 outline-none focus:border-brand-primary cursor-pointer"
+              >
+                <option value={10}>10 منتجات</option>
+                <option value={20}>20 منتج</option>
+                <option value={50}>50 منتج</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={safeCurrentPage <= 1}
+                className="p-1.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                title="الصفحة السابقة"
+                aria-label="الصفحة السابقة"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+
+              <span className="px-3 py-1 font-bold text-xs bg-brand-soft-pink text-brand-primary rounded-xl">
+                صفحة {safeCurrentPage} من {totalPages}
+              </span>
+
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={safeCurrentPage >= totalPages}
+                className="p-1.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                title="الصفحة التالية"
+                aria-label="الصفحة التالية"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add / Edit Product Modal */}
       {modalOpen && (

@@ -64,11 +64,11 @@ export function AdminLayout() {
 
   return (
     <div
-      className="min-h-screen bg-gray-50 flex flex-col md:flex-row text-gray-800 font-sans"
+      className="h-screen overflow-hidden bg-gray-50 flex flex-col md:flex-row text-gray-800 font-sans"
       dir="rtl"
     >
       {/* Mobile Header */}
-      <header className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+      <header className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shrink-0">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -99,12 +99,12 @@ export function AdminLayout() {
 
       {/* Sidebar Drawer for Mobile / Static for Desktop */}
       <aside
-        className={`fixed inset-y-0 start-0 z-40 w-64 bg-white border-e border-gray-200 flex flex-col transition-transform duration-200 ease-in-out md:translate-x-0 md:static ${
+        className={`fixed inset-y-0 start-0 z-40 w-64 bg-white border-e border-gray-200 flex flex-col transition-transform duration-200 ease-in-out md:translate-x-0 md:static md:h-screen md:shrink-0 ${
           sidebarOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'
         }`}
       >
         {/* Sidebar Brand Header */}
-        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+        <div className="p-5 border-b border-gray-100 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <img src="/newLogo2.png" alt="سعودي براند" className="h-10 w-auto" />
             <div>
@@ -121,7 +121,7 @@ export function AdminLayout() {
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {visibleNavItems.map((item) => {
             const Icon = item.icon
             return (
@@ -146,7 +146,7 @@ export function AdminLayout() {
         </nav>
 
         {/* Sidebar Footer: Admin profile & Logout */}
-        <div className="p-3 border-t border-gray-100 space-y-2">
+        <div className="p-3 border-t border-gray-100 space-y-2 shrink-0">
           <div className="px-3 py-2 bg-gray-50 rounded-xl">
             <p className="text-xs font-bold text-gray-900 truncate">
               {admin?.name || 'مدير النظام'}
@@ -208,7 +208,7 @@ export function AdminLayout() {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <main className="flex-1 h-full overflow-y-auto p-4 sm:p-6 lg:p-8">
         <Outlet />
       </main>
     </div>
