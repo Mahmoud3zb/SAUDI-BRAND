@@ -46,7 +46,7 @@ export const loginHandler: RequestHandler = async (req, res, next) => {
 
                 const isSuper = user.role === Role.SUPER_ADMIN || user.email === "admin@saudibrand.com";
                 const userPermissions = isSuper
-                        ? ["manage_products", "manage_categories", "manage_orders", "view_overview", "manage_admins"]
+                        ? ["manage_products", "manage_categories", "manage_orders", "view_overview", "manage_admins", "manage_settings"]
                         : (user.permissions || []);
 
                 const token = jwtService.createToken(

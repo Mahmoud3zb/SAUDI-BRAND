@@ -1,21 +1,41 @@
-import { CheckCircle2, Home, MessageCircle, PackageCheck, ShoppingBag, Wallet } from 'lucide-react'
+import { CheckCircle2, Copy, Home, MessageCircle, PackageCheck, ShoppingBag, Wallet } from 'lucide-react'
 import { Link, useLocation, useParams } from 'react-router'
+import { toast } from 'sonner'
 import { Button } from '../../../components/ui/Button.tsx'
 import { formatEGP } from '../../../lib/formatters.ts'
 import type { PlacedOrder } from '../api/checkout.api.ts'
-import { STORE_WHATSAPP_NUMBER } from '../constants/egypt-regions.ts'
+import { useSettingsStore } from '../../settings/settings.store.ts'
 import { buildWhatsAppLink } from '../utils/whatsapp.ts'
 
 export function OrderSuccessPage() {
   const { orderId } = useParams<{ orderId: string }>()
   const location = useLocation()
+  const defaultNum = useSettingsStore((state) => state.whatsappNumber)
+  const defaultIntl = useSettingsStore((state) => state.whatsappNumberIntl)
+  const contactChannels = useSettingsStore((state) => state.contactChannels)
+
+  const ordersNumber = contactChannels?.orders?.number || defaultNum
+  const ordersIntl = contactChannels?.orders?.intl || defaultIntl
+  const walletNumber = contactChannels?.wallet?.number || defaultNum
+  const walletHolder = contactChannels?.wallet?.accountName || 'سعودي براند'
+
+  const copyToClipboard = (text: string, label: string) => {
+    try {
+      navigator.clipboard.writeText(text)
+      toast.success(`تم نسخ ${label} بنجاح 📋: ${text}`)
+    } catch {
+      toast.info(`${label}: ${text}`)
+    }
+  }
+
   const state = location.state as { order?: PlacedOrder; waLink?: string; waMessage?: string } | undefined
   const order = state?.order
   const waLink =
     state?.waLink ||
     (orderId
       ? buildWhatsAppLink(
-          `مرحباً، أود الاستفسار ومتابعة حالة طلبي رقم: #${orderId.slice(-6).toUpperCase()} من المتجر.`
+          `مرحباً، أود الاستفسار ومتابعة حالة طلبي رقم: #${orderId.slice(-6).toUpperCase()} من المتجر.`,
+          ordersIntl
         )
       : undefined)
 
@@ -64,7 +84,7 @@ export function OrderSuccessPage() {
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all cursor-pointer"
             >
               <MessageCircle className="h-4 w-4" />
-              <span>فتح المحادثة على الواتساب ({STORE_WHATSAPP_NUMBER})</span>
+              <span>فتح المحادثة على الواتساب ({ordersNumber})</span>
             </a>
           </div>
         )}
@@ -76,11 +96,18 @@ export function OrderSuccessPage() {
               <Wallet className="h-4 w-4 text-amber-600" />
               <span>تعليمات التحويل عبر فودافون كاش:</span>
             </div>
-            <p>
-              1. يرجى تحويل المبلغ الإجمالي <strong>({formatEGP(order.totalPrice)})</strong> إلى محفظة فودافون كاش على الرقم:
-              <span className="inline-block mx-1 font-mono font-bold text-amber-950 px-2 py-0.5 bg-amber-100 rounded">
-                {STORE_WHATSAPP_NUMBER}
-              </span>
+            <p className="flex flex-wrap items-center gap-1.5 pt-1">
+              <span>1. يرجى تحويل المبلغ الإجمالي <strong>({formatEGP(order.totalPrice)})</strong> إلى محفظة فودافون كاش على الرقم:</span>
+              <button
+                type="button"
+                onClick={() => copyToClipboard(walletNumber, 'رقم فودافون كاش')}
+                className="inline-flex items-center gap-1 font-mono font-bold text-amber-950 px-2.5 py-1 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors cursor-pointer"
+                title="اضغط لنسخ الرقم"
+              >
+                <span>{walletNumber}</span>
+                <Copy className="h-3.5 w-3.5 text-amber-700" />
+              </button>
+              <span className="text-[11px] text-amber-800">(باسم: {walletHolder})</span>
             </p>
             <p>
               2. بعد إتمام التحويل، يرجى إرسال لقطة شاشة (سكرين شوت) للتحويل في شات الواتساب لتأكيد خروج الأوردر فوراً.
@@ -94,11 +121,18 @@ export function OrderSuccessPage() {
               <Wallet className="h-4 w-4 text-purple-600" />
               <span>تعليمات التحويل عبر انستاباي (InstaPay):</span>
             </div>
-            <p>
-              1. يرجى تحويل المبلغ الإجمالي <strong>({formatEGP(order.totalPrice)})</strong> عبر تطبيق InstaPay إلى رقم الموبايل:
-              <span className="inline-block mx-1 font-mono font-bold text-purple-950 px-2 py-0.5 bg-purple-100 rounded">
-                {STORE_WHATSAPP_NUMBER}
-              </span>
+            <p className="flex flex-wrap items-center gap-1.5 pt-1">
+              <span>1. يرجى تحويل المبلغ الإجمالي <strong>({formatEGP(order.totalPrice)})</strong> عبر تطبيق InstaPay إلى رقم الموبايل:</span>
+              <button
+                type="button"
+                onClick={() => copyToClipboard(walletNumber, 'رقم انستاباي')}
+                className="inline-flex items-center gap-1 font-mono font-bold text-purple-950 px-2.5 py-1 bg-purple-100 hover:bg-purple-200 rounded-lg transition-colors cursor-pointer"
+                title="اضغط لنسخ الرقم"
+              >
+                <span>{walletNumber}</span>
+                <Copy className="h-3.5 w-3.5 text-purple-700" />
+              </button>
+              <span className="text-[11px] text-purple-800">(حساب: {walletHolder})</span>
             </p>
             <p>
               2. يرجى إرسال إشعار أو سكرين شوت بالتحويل على الواتساب لتأكيد خروج الشحنة مع المندوب.

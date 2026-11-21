@@ -1,37 +1,40 @@
 import { Eye, MessageCircle, RefreshCw, Truck } from 'lucide-react'
-import { STORE_WHATSAPP_NUMBER } from '../../features/checkout/constants/egypt-regions.ts'
-
-const TRUST_FEATURES = [
-  {
-    icon: <Eye className="h-6 w-6 text-brand-primary" aria-hidden="true" />,
-    title: 'حق المعاينة قبل الدفع',
-    description: 'افتحي الشحنة وتأكدي من كل منتج أمام المندوب قبل سداد أي مليم.',
-    tag: 'راحة وأمان 100%',
-  },
-  {
-    icon: <Truck className="h-6 w-6 text-brand-primary" aria-hidden="true" />,
-    title: 'توصيل لجميع المحافظات',
-    tag: 'تسليم حتى باب البيت',
-  },
-  {
-    icon: <RefreshCw className="h-6 w-6 text-brand-primary" aria-hidden="true" />,
-    title: 'استبدال واسترجاع 14 يوم',
-    description: 'ضمان كامل لحقوقكِ في الاستبدال أو الاسترجاع بكل سهولة ويسر.',
-    tag: 'ضمان حماية المستهلك',
-  },
-  {
-    icon: <MessageCircle className="h-6 w-6 text-emerald-600" aria-hidden="true" />,
-    title: 'دعم ومتابعة واتساب',
-    description: `فريق خدمة العملاء متواجد لمساعدتكِ يومياً على ${STORE_WHATSAPP_NUMBER}.`,
-    tag: 'رد فوري خلال دقائق',
-  },
-]
+import { useSettingsStore } from '../../features/settings/settings.store.ts'
 
 export function TrustBadges() {
+  const whatsappNumber = useSettingsStore((state) => state.whatsappNumber)
+
+  const trustFeatures = [
+    {
+      icon: <Eye className="h-6 w-6 text-brand-primary" aria-hidden="true" />,
+      title: 'حق المعاينة قبل الدفع',
+      description: 'افتحي الشحنة وتأكدي من كل منتج أمام المندوب قبل سداد أي مليم.',
+      tag: 'راحة وأمان 100%',
+    },
+    {
+      icon: <Truck className="h-6 w-6 text-brand-primary" aria-hidden="true" />,
+      title: 'توصيل لجميع المحافظات',
+      description: 'شحن سريع ومباشر لباب بيتكِ لجميع المحافظات في مصر مع متابعة دورية.',
+      tag: 'تسليم حتى باب البيت',
+    },
+    {
+      icon: <RefreshCw className="h-6 w-6 text-brand-primary" aria-hidden="true" />,
+      title: 'استبدال واسترجاع 14 يوم',
+      description: 'ضمان كامل لحقوقكِ في الاستبدال أو الاسترجاع بكل سهولة ويسر.',
+      tag: 'ضمان حماية المستهلك',
+    },
+    {
+      icon: <MessageCircle className="h-6 w-6 text-emerald-600" aria-hidden="true" />,
+      title: 'دعم ومتابعة واتساب',
+      description: `فريق خدمة العملاء متواجد لمساعدتكِ يومياً على ${whatsappNumber}.`,
+      tag: 'رد فوري خلال دقائق',
+    },
+  ]
+
   return (
     <section aria-label="ضمانات ومميزات المتجر" className="py-4 font-sans" dir="rtl">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {TRUST_FEATURES.map((item, index) => (
+        {trustFeatures.map((item, index) => (
           <div
             key={index}
             className="group flex flex-col justify-between rounded-3xl border border-gray-100 bg-white p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-brand-soft-pink transition-all duration-300 relative overflow-hidden"

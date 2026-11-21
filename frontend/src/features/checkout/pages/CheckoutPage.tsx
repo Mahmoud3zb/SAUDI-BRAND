@@ -3,6 +3,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
+  Copy,
   HelpCircle,
   MapPin,
   MessageCircle,
@@ -23,9 +24,9 @@ import { formatEGP } from '../../../lib/formatters.ts'
 import { checkoutApi } from '../api/checkout.api.ts'
 import {
   EGYPT_GOVERNORATES,
-  STORE_WHATSAPP_NUMBER,
   getGovernorateShippingFee,
 } from '../constants/egypt-regions.ts'
+import { useSettingsStore } from '../../settings/settings.store.ts'
 import { buildWhatsAppLink, formatWhatsAppMessage } from '../utils/whatsapp.ts'
 
 export function CheckoutPage() {
@@ -33,6 +34,14 @@ export function CheckoutPage() {
   const items = useCartStore((state) => state.items)
   const clearCart = useCartStore((state) => state.clearCart)
   const subtotal = useCartSubtotal()
+  const defaultNum = useSettingsStore((state) => state.whatsappNumber)
+  const defaultIntl = useSettingsStore((state) => state.whatsappNumberIntl)
+  const contactChannels = useSettingsStore((state) => state.contactChannels)
+
+  const ordersWhatsappIntl = contactChannels?.orders?.intl || defaultIntl
+  const walletNumber = contactChannels?.wallet?.number || defaultNum
+  const walletHolder = contactChannels?.wallet?.accountName || 'سعودي براند'
+  const supportNumber = contactChannels?.support?.number || defaultNum
 
   // Form State
   const [customerName, setCustomerName] = useState('')
@@ -44,8 +53,18 @@ export function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'vodafone_cash' | 'instapay'>('cod')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Dynamic Shipping Fee based on Egyptian Governorate (100 Cairo, 80 Delta, 60 Said)
-  const shippingFee = getGovernorateShippingFee(city)
+  const copyToClipboard = (text: string, label: string) => {
+    try {
+      navigator.clipboard.writeText(text)
+      toast.success(`تم نسخ ${label} بنجاح 📋: ${text}`)
+    } catch {
+      toast.info(`${label}: ${text}`)
+    }
+  }
+
+  // Dynamic Shipping Fee based on Settings & Egyptian Governorate
+  const shippingRates = useSettingsStore((state) => state.shippingRates)
+  const shippingFee = getGovernorateShippingFee(city, shippingRates)
   const grandTotal = subtotal + shippingFee
 
   if (items.length === 0) {
@@ -139,7 +158,7 @@ export function CheckoutPage() {
         paymentMethod,
       })
 
-      const waLink = buildWhatsAppLink(waMessage)
+      const waLink = buildWhatsAppLink(waMessage, ordersWhatsappIntl)
 
       // 3. Clear customer cart
       clearCart()
@@ -189,7 +208,7 @@ export function CheckoutPage() {
         {/* WhatsApp Notice Pill */}
         <div className="inline-flex items-center gap-2 self-start rounded-full bg-emerald-50 px-4 py-1.5 text-xs font-bold text-emerald-800 border border-emerald-200">
           <MessageCircle className="h-4 w-4 text-emerald-600" />
-          <span>خدمة العملاء: {STORE_WHATSAPP_NUMBER}</span>
+          <span>خدمة العملاء: {supportNumber}</span>
         </div>
       </div>
 
@@ -263,11 +282,14 @@ export function CheckoutPage() {
                         onChange={(e) => setCity(e.target.value)}
                         className="w-full rounded-xl border border-gray-200 bg-white p-3 text-xs sm:text-sm text-gray-800 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 cursor-pointer"
                       >
-                        {EGYPT_GOVERNORATES.map((gov) => (
-                          <option key={gov.name} value={gov.name}>
-                            {gov.name} (شحن: {gov.shippingFee} ج.م)
-                          </option>
-                        ))}
+                        {EGYPT_GOVERNORATES.map((gov) => {
+                          const fee = getGovernorateShippingFee(gov.name, shippingRates)
+                          return (
+                            <option key={gov.name} value={gov.name}>
+                              {gov.name} (شحن: {fee} ج.م)
+                            </option>
+                          )
+                        })}
                       </select>
                     </div>
                   </div>
@@ -376,9 +398,21 @@ export function CheckoutPage() {
                       className="text-brand-primary focus:ring-brand-primary"
                     />
                   </div>
-                  <p className="text-[11px] text-gray-500 mt-2">
-                    تحويل فوري لمحفظة {STORE_WHATSAPP_NUMBER} مع إرسال الإيصال
-                  </p>
+                  <div className="flex items-center justify-between text-[11px] text-gray-500 mt-2">
+                    <span>تحويل لمحفظة {walletHolder}</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        copyToClipboard(walletNumber, 'رقم فودافون كاش')
+                      }}
+                      className="inline-flex items-center gap-1 font-mono font-bold text-brand-primary px-1.5 py-0.5 rounded bg-brand-soft-pink/60 hover:bg-brand-soft-pink transition-colors cursor-pointer"
+                      title="نسخ رقم المحفظة"
+                    >
+                      <span>{walletNumber}</span>
+                      <Copy className="h-3 w-3" />
+                    </button>
+                  </div>
                 </label>
 
                 {/* 3. InstaPay */}
@@ -403,9 +437,21 @@ export function CheckoutPage() {
                       className="text-brand-primary focus:ring-brand-primary"
                     />
                   </div>
-                  <p className="text-[11px] text-gray-500 mt-2">
-                    تحويل بنكي لحظي عبر تطبيق انستاباي وتأكيده بالواتساب
-                  </p>
+                  <div className="flex items-center justify-between text-[11px] text-gray-500 mt-2">
+                    <span>تحويل لحساب {walletHolder}</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        copyToClipboard(walletNumber, 'رقم انستاباي')
+                      }}
+                      className="inline-flex items-center gap-1 font-mono font-bold text-brand-primary px-1.5 py-0.5 rounded bg-brand-soft-pink/60 hover:bg-brand-soft-pink transition-colors cursor-pointer"
+                      title="نسخ رقم انستاباي"
+                    >
+                      <span>{walletNumber}</span>
+                      <Copy className="h-3 w-3" />
+                    </button>
+                  </div>
                 </label>
               </div>
 
@@ -469,9 +515,7 @@ export function CheckoutPage() {
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-1">
-                    <span>مصاريف الشحن ({city}):</span>
-                  </div>
+                  <span>مصاريف الشحن ({city}):</span>
                   <span className="font-bold text-gray-900">{formatEGP(shippingFee)}</span>
                 </div>
 

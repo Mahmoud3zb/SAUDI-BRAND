@@ -21,7 +21,7 @@ import { useCartStore } from '../../cart/cart.store.ts'
 import { useCategories } from '../hooks/useCategories.ts'
 import { useProduct, useProductsByCategory } from '../hooks/useProducts.ts'
 import { formatEGP } from '../../../lib/formatters.ts'
-import { STORE_WHATSAPP_INTL } from '../../checkout/constants/egypt-regions.ts'
+import { useSettingsStore } from '../../settings/settings.store.ts'
 
 export function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>()
@@ -472,7 +472,7 @@ export function ProductDetailPage() {
               {/* Quick WhatsApp Order Button */}
               <div className="mt-3">
                 <a
-                  href={`https://wa.me/${STORE_WHATSAPP_INTL}?text=${encodeURIComponent(
+                  href={`https://wa.me/${useSettingsStore.getState().whatsappNumberIntl}?text=${encodeURIComponent(
                     `مرحباً، أود طلب المنتج: *${product.name}* (الكمية: ${quantity}) بسعر إجمالي ${product.price * quantity} ج.م من المتجر.`
                   )}`}
                   target="_blank"

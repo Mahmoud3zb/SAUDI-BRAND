@@ -1,8 +1,9 @@
 import { Heart, MessageCircle, ShieldCheck, Sparkles, Star } from 'lucide-react'
 import { Link } from 'react-router'
-import { STORE_WHATSAPP_INTL} from '../checkout/constants/egypt-regions.ts'
+import { useSettingsStore } from '../settings/settings.store.ts'
 
 export function AboutUsPage() {
+  const whatsappNumberIntl = useSettingsStore((state) => state.whatsappNumberIntl)
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 font-sans" dir="rtl">
       {/* Breadcrumb */}
@@ -67,7 +68,7 @@ export function AboutUsPage() {
             </p>
           </div>
           <a
-            href={`https://wa.me/${STORE_WHATSAPP_INTL}?text=${encodeURIComponent('مرحباً، أود التواصل مع إدارة سعودي براند.')}`}
+            href={`https://wa.me/${whatsappNumberIntl}?text=${encodeURIComponent('مرحباً، أود التواصل مع إدارة سعودي براند.')}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors shrink-0"

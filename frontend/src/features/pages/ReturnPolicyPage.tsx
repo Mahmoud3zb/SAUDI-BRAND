@@ -1,8 +1,9 @@
 import { CheckCircle2, MessageCircle, RefreshCw, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router'
-import { STORE_WHATSAPP_INTL} from '../checkout/constants/egypt-regions.ts'
+import { useSettingsStore } from '../settings/settings.store.ts'
 
 export function ReturnPolicyPage() {
+  const whatsappNumberIntl = useSettingsStore((state) => state.whatsappNumberIntl)
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 font-sans" dir="rtl">
       {/* Breadcrumb */}
@@ -89,13 +90,13 @@ export function ReturnPolicyPage() {
             <p className="text-xs text-gray-500 mt-0.5">فريق خدمة العملاء جاهز للرد على استفسارك خلال دقائق.</p>
           </div>
           <a
-            href={`https://wa.me/${STORE_WHATSAPP_INTL}?text=${encodeURIComponent('مرحباً، أود طلب استبدال أو استرجاع لطلب سابق.')}`}
+            href={`https://wa.me/${whatsappNumberIntl}?text=${encodeURIComponent('مرحباً، أود طلب استبدال أو استرجاع لطلب سابق.')}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors shrink-0"
           >
             <MessageCircle className="h-4 w-4" />
-            
+            <span>تواصل مع خدمة العملاء</span>
           </a>
         </div>
       </div>

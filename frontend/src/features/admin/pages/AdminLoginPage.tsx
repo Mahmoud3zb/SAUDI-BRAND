@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Lock, Mail, Store } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import { toast } from 'sonner'
@@ -11,10 +11,19 @@ export function AdminLoginPage() {
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const login = useAdminAuthStore((state) => state.login)
+  const checkAuth = useAdminAuthStore((state) => state.checkAuth)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (checkAuth()) {
+      navigate('/admin', { replace: true })
+    }
+  }, [checkAuth, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isLoading) return
+
     if (!email.trim() || !password.trim()) {
       toast.error('يرجى ملء جميع الحقول')
       return
@@ -24,7 +33,7 @@ export function AdminLoginPage() {
     try {
       await login(email.trim(), password)
       toast.success('تم تسجيل الدخول بنجاح')
-      navigate('/admin')
+      navigate('/admin', { replace: true })
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'فشل تسجيل الدخول، تأكد من صحة البيانات'
       toast.error(msg)

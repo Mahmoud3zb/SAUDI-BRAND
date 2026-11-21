@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { Cart } from "../../cart/cart-model";
 import { Product } from "../../product/product-model";
 import { Order, PaymentMethod } from "../order-model";
+import { getOrCreateSettings } from "../../setting/setting-model";
 
 export const createOrderValidation = [
     body("customerName")
@@ -164,12 +165,20 @@ export const createOrder: RequestHandler = async (req, res, next) => {
             "البحر الأحمر", "الغردقة", "الوادي الجديد", "مطروح", "شمال سيناء", "جنوب سيناء"
         ];
 
+        const settings = await getOrCreateSettings();
+        const rates = settings.shippingRates || { cairoGiza: 100, delta: 80, said: 60 };
+
         const targetCity = (shippingAddress.city || "").trim();
-        let shippingFee = 100; // الافتراضي القاهرة والجيزة
+        let shippingFee = rates.cairoGiza ?? 100; // الافتراضي القاهرة والجيزة
         if (saidCities.some(c => targetCity.includes(c))) {
-            shippingFee = 60; // الصعيد
+            shippingFee = rates.said ?? 60; // الصعيد
         } else if (deltaCities.some(c => targetCity.includes(c))) {
-            shippingFee = 80; // الدلتا
+            shippingFee = rates.delta ?? 80; // الدلتا
+        }
+
+        // Apply Free Shipping Threshold if configured and met
+        if (settings.freeShippingThreshold && settings.freeShippingThreshold > 0 && itemsTotal >= settings.freeShippingThreshold) {
+            shippingFee = 0;
         }
 
         const grandTotal = itemsTotal + shippingFee;

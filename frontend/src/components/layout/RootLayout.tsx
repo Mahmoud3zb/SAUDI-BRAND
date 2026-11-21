@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react'
+import { useEffect, useSyncExternalStore } from 'react'
 import { Outlet, ScrollRestoration } from 'react-router'
 import { Toaster } from 'sonner'
 import { CartDrawer } from '../../features/cart/CartDrawer.tsx'
@@ -8,6 +8,7 @@ import { Header } from './Header.tsx'
 import { MobileBottomNav } from './MobileBottomNav.tsx'
 import { Navbar } from './Navbar.tsx'
 import { TopBar } from './TopBar.tsx'
+import { useSettingsStore } from '../../features/settings/settings.store.ts'
 
 const MOBILE_QUERY = '(max-width: 639px)'
 
@@ -31,6 +32,11 @@ function useIsMobile() {
 
 export function RootLayout() {
   const isMobile = useIsMobile()
+  const fetchSettings = useSettingsStore((state) => state.fetchSettings)
+
+  useEffect(() => {
+    fetchSettings()
+  }, [fetchSettings])
 
   return (
     <div className="flex min-h-screen flex-col bg-brand-background font-sans text-gray-900">

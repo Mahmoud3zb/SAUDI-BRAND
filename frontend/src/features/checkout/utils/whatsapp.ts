@@ -1,4 +1,5 @@
 import { STORE_WHATSAPP_INTL } from '../constants/egypt-regions.ts'
+import { useSettingsStore } from '../../settings/settings.store.ts'
 
 export interface WhatsAppOrderDetails {
   orderId?: string
@@ -54,7 +55,8 @@ ${itemsFormatted}
 يرجى تأكيد تجهيز الأوردر وميعاد الشحن، شكراً لكم! 🤍`
 }
 
-export function buildWhatsAppLink(message: string, phoneIntl: string = STORE_WHATSAPP_INTL): string {
-  return `https://wa.me/${phoneIntl}?text=${encodeURIComponent(message)}`
+export function buildWhatsAppLink(message: string, phoneIntl?: string): string {
+  const activeIntl = phoneIntl || useSettingsStore.getState().whatsappNumberIntl || STORE_WHATSAPP_INTL
+  return `https://wa.me/${activeIntl}?text=${encodeURIComponent(message)}`
 }
 

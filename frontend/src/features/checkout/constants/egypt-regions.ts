@@ -42,14 +42,22 @@ export const EGYPT_GOVERNORATES: GovernorateInfo[] = [
 export const STORE_WHATSAPP_NUMBER = '01006488707'
 export const STORE_WHATSAPP_INTL = '201006488707'
 
-export function getGovernorateShippingFee(govName: string): number {
-  const match = EGYPT_GOVERNORATES.find((g) => g.name === govName)
+export function getGovernorateShippingFee(
+  govName: string,
+  customRates?: { cairoGiza: number; delta: number; said: number }
+): number {
+  const match =
+    EGYPT_GOVERNORATES.find((g) => g.name === govName) ||
+    EGYPT_GOVERNORATES.find((g) => govName.includes(g.name) || g.name.includes(govName))
+
+  const region = match?.region || 'cairo'
+  if (customRates) {
+    if (region === 'said') return customRates.said
+    if (region === 'delta') return customRates.delta
+    return customRates.cairoGiza
+  }
+
   if (match) return match.shippingFee
-
-  // Fallback by keyword search
-  const found = EGYPT_GOVERNORATES.find((g) => govName.includes(g.name) || g.name.includes(govName))
-  if (found) return found.shippingFee
-
-  return 100 // default Cairo
+  return 100
 }
 

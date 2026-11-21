@@ -50,6 +50,13 @@ const AVAILABLE_PERMISSIONS = [
     badge: 'الإحصائيات',
     color: 'bg-amber-50 text-amber-700 border-amber-200',
   },
+  {
+    id: 'manage_settings',
+    label: 'التحكم برقم الواتساب وإعدادات المتجر',
+    description: 'تغيير رقم الواتساب الرسمي وقنوات التواصل المعتمدة للمتجر',
+    badge: 'الإعدادات',
+    color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  },
 ]
 
 export function AdminUsersPage() {

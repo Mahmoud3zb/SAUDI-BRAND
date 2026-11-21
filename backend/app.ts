@@ -11,6 +11,7 @@ import cors from "cors";
 import helmet from "helmet";
 import { cartRouter } from "./src/cart/cart-router";
 import orderRouter from "./src/order/order-router";
+import settingRouter from "./src/setting/setting-router";
 import bcrypt from "bcrypt";
 import { User, Role } from "./src/user/user-model";
 
@@ -32,7 +33,7 @@ async function ensureAdminUser() {
         const adminEmail = "admin@saudibrand.com";
         const hashedPassword = await bcrypt.hash("admin123", 10);
         const existing = await User.findOne({ email: adminEmail });
-        const allPermissions = ["manage_products", "manage_categories", "manage_orders", "view_overview", "manage_admins"];
+        const allPermissions = ["manage_products", "manage_categories", "manage_orders", "view_overview", "manage_admins", "manage_settings"];
 
         if (!existing) {
             await User.create({
@@ -142,6 +143,7 @@ app.use("/api/category",categoryRouter)
 app.use("/api/product",productRouter)
 app.use("/api/cart",cartRouter)
 app.use("/api/order",orderRouter)
+app.use("/api/settings", settingRouter)
 
 app.get('/', (req, res) => {
     res.status(200).send('SAUDI-BRAND API is running');

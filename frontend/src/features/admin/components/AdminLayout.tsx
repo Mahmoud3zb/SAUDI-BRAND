@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   BarChart3,
   Boxes,
@@ -6,19 +6,25 @@ import {
   FolderTree,
   LogOut,
   Menu,
+  Settings,
   ShoppingBag,
   Store,
   Users,
+  Volume2,
+  VolumeX,
   X,
 } from 'lucide-react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router'
 import { useAdminAuthStore } from '../../auth/admin-auth.store.ts'
+import { useOrderNotification } from '../hooks/useOrderNotification.ts'
+import { useSettingsStore } from '../../settings/settings.store.ts'
 
 const navItems = [
   { to: '/admin', label: 'نظرة عامة', icon: BarChart3, end: true, permission: 'view_overview' },
   { to: '/admin/categories', label: 'الأقسام', icon: FolderTree, permission: 'manage_categories' },
   { to: '/admin/products', label: 'المنتجات', icon: Boxes, permission: 'manage_products' },
   { to: '/admin/orders', label: 'الطلبات', icon: ShoppingBag, permission: 'manage_orders' },
+  { to: '/admin/settings', label: 'إعدادات المتجر', icon: Settings, permission: 'manage_settings' },
   { to: '/admin/admins', label: 'المشرفين', icon: Users, superAdminOnly: true },
 ]
 
@@ -29,6 +35,14 @@ export function AdminLayout() {
   const isSuperAdmin = useAdminAuthStore((state) => state.isSuperAdmin)
   const hasPermission = useAdminAuthStore((state) => state.hasPermission)
   const navigate = useNavigate()
+
+  // Real-time live new order listener with audio chime
+  const { soundEnabled, toggleSound } = useOrderNotification()
+  const fetchSettings = useSettingsStore((state) => state.fetchSettings)
+
+  useEffect(() => {
+    fetchSettings()
+  }, [fetchSettings])
 
   const handleLogout = async () => {
     await logout()
@@ -68,10 +82,19 @@ export function AdminLayout() {
             لوحة الإدارة
           </span>
         </div>
-        <Link to="/" className="text-xs font-semibold text-brand-primary flex items-center gap-1">
-          <span>المتجر</span>
-          <ChevronRight className="h-4 w-4 rotate-180" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleSound}
+            className="p-1.5 rounded-lg text-gray-600 hover:bg-gray-100"
+            title={soundEnabled ? 'كتم رنة الأوردرات الجديدة' : 'تفعيل رنة الأوردرات الجديدة'}
+          >
+            {soundEnabled ? <Volume2 className="h-4 w-4 text-emerald-600" /> : <VolumeX className="h-4 w-4 text-gray-400" />}
+          </button>
+          <Link to="/" className="text-xs font-semibold text-brand-primary flex items-center gap-1">
+            <span>المتجر</span>
+            <ChevronRight className="h-4 w-4 rotate-180" />
+          </Link>
+        </div>
       </header>
 
       {/* Sidebar Drawer for Mobile / Static for Desktop */}
@@ -140,6 +163,21 @@ export function AdminLayout() {
               )}
             </div>
             <p className="text-[10px] text-gray-400 truncate mt-1 font-mono">{admin?.email}</p>
+          </div>
+
+          {/* Sound Alert Toggle */}
+          <div className="mb-3 px-3 py-2 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-gray-600">رنة الطلبات الجديدة</span>
+            <button
+              onClick={toggleSound}
+              type="button"
+              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                soundEnabled ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500'
+              }`}
+              title={soundEnabled ? 'كتم الصوت' : 'تشغيل الصوت'}
+            >
+              {soundEnabled ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
+            </button>
           </div>
 
           <div className="flex items-center gap-1">

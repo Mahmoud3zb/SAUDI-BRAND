@@ -5,15 +5,21 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  Download,
   Loader2,
   MessageCircle,
+  Printer,
   ShoppingBag,
   Search,
   Truck,
+  X,
   XCircle,
 } from 'lucide-react'
-import { adminApi } from '../api/admin.api.ts'
+import { toast } from 'sonner'
+import { Button } from '../../../components/ui/Button.tsx'
+import { adminApi, type AdminOrder } from '../api/admin.api.ts'
 import { useAdminAuthStore } from '../../auth/admin-auth.store.ts'
+import { useSettingsStore } from '../../settings/settings.store.ts'
 
 const STATUS_LABELS: Record<string, { label: string; color: string; icon: typeof Clock }> = {
   pending: {
@@ -39,6 +45,9 @@ export function AdminOrdersPage() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [selectedWaybill, setSelectedWaybill] = useState<AdminOrder | null>(null)
+
+  const whatsappNumber = useSettingsStore((state) => state.whatsappNumber)
 
   const isSuperAdmin = useAdminAuthStore((state) => state.isSuperAdmin)
   const hasPermission = useAdminAuthStore((state) => state.hasPermission)
@@ -88,11 +97,74 @@ export function AdminOrdersPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">إدارة الطلبات</h1>
-        <p className="text-xs sm:text-sm text-gray-500 mt-1">
-          متابعة طلبات العملاء وتحديث حالات الشحن والتسليم
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">إدارة الطلبات</h1>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            متابعة طلبات العملاء وتحديث حالات الشحن والتسليم
+          </p>
+        </div>
+
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={() => {
+            if (filteredOrders.length === 0) {
+              toast.error('لا توجد طلبات لتصديرها')
+              return
+            }
+
+            const headers = [
+              'رقم الطلب',
+              'تاريخ الطلب',
+              'اسم العميل',
+              'رقم الموبايل',
+              'المحافظة',
+              'العنوان بالتفصيل',
+              'طريقة الدفع',
+              'حالة الطلب',
+              'المبلغ الإجمالي',
+              'المنتجات',
+            ]
+
+            const rows = filteredOrders.map((o) => {
+              const itemsStr = (o.items || [])
+                .map((it) => {
+                  const p = typeof it.productID === 'object' && it.productID !== null ? it.productID.name : ''
+                  return `${p} (${it.quantity})`
+                })
+                .join(' + ')
+
+              return [
+                `#${o._id.slice(-6).toUpperCase()}`,
+                o.createdAt ? new Date(o.createdAt).toLocaleDateString('ar-EG') : '',
+                `"${(o.customerName || '').replace(/"/g, '""')}"`,
+                `"${(o.customerPhone || '').replace(/"/g, '""')}"`,
+                `"${(o.shippingAddress?.city || '').replace(/"/g, '""')}"`,
+                `"${(o.shippingAddress?.street || '').replace(/"/g, '""')}"`,
+                `"${o.paymentMethod || 'cod'}"`,
+                `"${STATUS_LABELS[o.status]?.label || o.status}"`,
+                o.totalPrice || 0,
+                `"${itemsStr.replace(/"/g, '""')}"`,
+              ].join(',')
+            })
+
+            const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n')
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+            const url = URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+            link.download = `saudi_brand_orders_${new Date().toISOString().slice(0, 10)}.csv`
+            link.click()
+            URL.revokeObjectURL(url)
+            toast.success('تم تصدير ملف الطلبات (Excel) بنجاح')
+          }}
+          leftIcon={<Download className="h-4 w-4" />}
+          className="text-xs font-bold"
+        >
+          تصدير إلى Excel ({filteredOrders.length})
+        </Button>
       </div>
 
       {/* Filter and Search Bar */}
@@ -230,6 +302,15 @@ export function AdminOrdersPage() {
                         <option value="cancelled">ملغي</option>
                       </select>
 
+                      {/* Print Waybill Button */}
+                      <button
+                        onClick={() => setSelectedWaybill(order)}
+                        className="p-1.5 text-gray-400 hover:text-brand-primary rounded-lg hover:bg-brand-soft-pink/40 transition-colors cursor-pointer"
+                        title="طباعة بوليصة الشحن"
+                      >
+                        <Printer className="h-4 w-4" />
+                      </button>
+
                       {/* Expand Button */}
                       <button
                         onClick={() => setExpandedId(isExpanded ? null : order._id)}
@@ -311,6 +392,145 @@ export function AdminOrdersPage() {
           })
         )}
       </div>
+
+      {/* Printable Shipping Waybill Slip Modal */}
+      {selectedWaybill && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-2xs">
+          <div className="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl border border-gray-200 animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 print:hidden">
+              <div className="flex items-center gap-2">
+                <Printer className="h-5 w-5 text-brand-primary" />
+                <h3 className="text-base font-bold text-gray-900">بوليصة الشحن والفاتورة</h3>
+              </div>
+              <button
+                onClick={() => setSelectedWaybill(null)}
+                className="p-1 rounded-lg text-gray-400 hover:text-gray-600 cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Printable Area */}
+            <div id="printable-waybill" className="py-4 space-y-4 font-sans text-xs" dir="rtl">
+              {/* Slip Header */}
+              <div className="flex items-center justify-between border-b-2 border-gray-800 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <img src="/newLogo2.png" alt="سعودي براند" className="h-10 w-auto" />
+                  <div>
+                    <h2 className="text-base font-black text-gray-900">سعودي براند | SAUDI BRAND</h2>
+                    <p className="text-[10px] text-gray-500">بوليصة شحن وتوصيل طرد للعميل</p>
+                  </div>
+                </div>
+                <div className="text-left font-mono">
+                  <span className="text-sm font-black text-gray-900 block">
+                    #{selectedWaybill._id.slice(-6).toUpperCase()}
+                  </span>
+                  <span className="text-[10px] text-gray-400">
+                    {selectedWaybill.createdAt
+                      ? new Date(selectedWaybill.createdAt).toLocaleDateString('ar-EG')
+                      : ''}
+                  </span>
+                </div>
+              </div>
+
+              {/* Sender & Consignee Box */}
+              <div className="grid grid-cols-2 gap-3 border border-gray-200 rounded-2xl p-3 bg-gray-50/60">
+                <div>
+                  <span className="text-[10px] font-bold text-gray-400 block mb-1">الراسل (Sender):</span>
+                  <p className="font-bold text-gray-900">متجر سعودي براند</p>
+                  <p className="text-[11px] text-gray-600">خدمة العملاء: {whatsappNumber}</p>
+                  <p className="text-[11px] text-gray-500">القاهرة - جمهورية مصر العربية</p>
+                </div>
+                <div className="border-s border-gray-200 ps-3">
+                  <span className="text-[10px] font-bold text-gray-400 block mb-1">المستلم (Consignee):</span>
+                  <p className="font-bold text-gray-900">{selectedWaybill.customerName}</p>
+                  <p className="text-[11px] font-bold font-mono text-gray-800">📞 {selectedWaybill.customerPhone}</p>
+                  <p className="text-[11px] text-gray-700">📍 {selectedWaybill.shippingAddress?.city} - {selectedWaybill.shippingAddress?.street}</p>
+                  {selectedWaybill.shippingAddress?.district && (
+                    <p className="text-[10px] text-gray-500">حي: {selectedWaybill.shippingAddress.district}</p>
+                  )}
+                  {selectedWaybill.shippingAddress?.notes && (
+                    <p className="text-[10px] text-amber-800 bg-amber-50 p-1 rounded mt-1">
+                      ملاحظة: {selectedWaybill.shippingAddress.notes}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Items Table */}
+              <div className="border border-gray-200 rounded-2xl overflow-hidden">
+                <table className="w-full text-right">
+                  <thead className="bg-gray-100 text-[10px] font-bold text-gray-600">
+                    <tr>
+                      <th className="py-1.5 px-3">المنتج</th>
+                      <th className="py-1.5 px-2 text-center">الكمية</th>
+                      <th className="py-1.5 px-3 text-left">السعر</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 text-xs">
+                    {selectedWaybill.items?.map((it, idx) => {
+                      const prodName =
+                        typeof it.productID === 'object' && it.productID !== null
+                          ? it.productID.name
+                          : 'منتج'
+                      return (
+                        <tr key={idx}>
+                          <td className="py-2 px-3 font-medium text-gray-800">{prodName}</td>
+                          <td className="py-2 px-2 text-center font-bold font-mono">{it.quantity}</td>
+                          <td className="py-2 px-3 text-left font-mono">{it.price * it.quantity} ج.م</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Total & Payment Method Box */}
+              <div className="p-3.5 bg-gray-900 text-white rounded-2xl flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-gray-300 block">طريقة التحصيل:</span>
+                  <span className="text-xs font-bold text-amber-400">
+                    {selectedWaybill.paymentMethod === 'cod'
+                      ? 'دفع نقداً عند الاستلام (COD)'
+                      : selectedWaybill.paymentMethod}
+                  </span>
+                </div>
+                <div className="text-left">
+                  <span className="text-[10px] text-gray-300 block">المبلغ المطلوب تحصيله من العميل:</span>
+                  <span className="text-lg font-black font-mono text-emerald-400">
+                    {selectedWaybill.totalPrice?.toFixed(2)} ج.م
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-center text-[10px] text-gray-400 pt-1">
+                شكراً لثقتكم في متجر سعودي براند • يحق للعميل المعاينة قبل الدفع
+              </div>
+            </div>
+
+            {/* Actions Bar */}
+            <div className="pt-3 border-t border-gray-100 flex items-center justify-end gap-2.5 print:hidden">
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={() => setSelectedWaybill(null)}
+                className="text-xs font-semibold px-4 cursor-pointer"
+              >
+                إغلاق
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => window.print()}
+                leftIcon={<Printer className="h-4 w-4" />}
+                className="text-xs font-bold px-6 cursor-pointer"
+              >
+                طباعة البوليصة الآن
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

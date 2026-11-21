@@ -5,6 +5,7 @@ import { Badge } from '../../components/ui/Badge.tsx'
 import { Button } from '../../components/ui/Button.tsx'
 import { formatEGP } from '../../lib/formatters.ts'
 import { useCartStore, useCartSubtotal, useCartTotalQuantity } from './cart.store.ts'
+import { useSettingsStore } from '../settings/settings.store.ts'
 
 export function CartDrawer() {
   const isOpen = useCartStore((state) => state.isOpen)
@@ -16,6 +17,8 @@ export function CartDrawer() {
 
   const totalQuantity = useCartTotalQuantity()
   const subtotal = useCartSubtotal()
+  const freeShippingThreshold = useSettingsStore((state) => state.freeShippingThreshold)
+  const isFreeShipping = freeShippingThreshold > 0 && subtotal >= freeShippingThreshold
 
   const closeButtonRef = useRef<HTMLButtonElement | null>(null)
 
@@ -228,9 +231,19 @@ export function CartDrawer() {
               <span className="text-lg font-black text-brand-primary">{formatEGP(subtotal)}</span>
             </div>
 
-            <p className="text-[11px] text-gray-500 leading-relaxed">
-              * الشحن: 100 ج.م للقاهرة، 80 ج.م للدلتا، 60 ج.م للصعيد. يتم تأكيد الطلب فورياً عبر الواتساب 💬
-            </p>
+            {isFreeShipping ? (
+              <p className="text-[11px] text-emerald-700 font-bold bg-emerald-50 p-2.5 rounded-xl border border-emerald-200 text-center">
+                🎉 مبروك! طلبيتكِ مؤهلة لـ <strong>الشحن المجاني</strong>
+              </p>
+            ) : freeShippingThreshold > 0 ? (
+              <p className="text-[11px] text-gray-700 bg-brand-soft-pink/50 p-2.5 rounded-xl border border-brand-primary/20 text-center">
+                أضيفي منتجات بـ <strong>{formatEGP(freeShippingThreshold - subtotal)}</strong> للاستفادة من <strong>الشحن المجاني</strong>! 🚚
+              </p>
+            ) : (
+              <p className="text-[11px] text-gray-500 leading-relaxed">
+                * يتم تأكيد الطلب والشحن وتفاصيل التوصيل فورياً عبر الواتساب 💬
+              </p>
+            )}
 
             {/* Checkout Action */}
             <div className="pt-1 flex flex-col gap-2">

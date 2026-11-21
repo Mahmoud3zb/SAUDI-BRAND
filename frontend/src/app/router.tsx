@@ -16,6 +16,7 @@ import { AdminProductsPage } from '../features/admin/pages/AdminProductsPage.tsx
 import { AdminCategoriesPage } from '../features/admin/pages/AdminCategoriesPage.tsx'
 import { AdminOrdersPage } from '../features/admin/pages/AdminOrdersPage.tsx'
 import { AdminUsersPage } from '../features/admin/pages/AdminUsersPage.tsx'
+import { AdminSettingsPage } from '../features/admin/pages/AdminSettingsPage.tsx'
 
 export const router = createBrowserRouter([
   {
@@ -90,6 +91,10 @@ export const router = createBrowserRouter([
           {
             path: 'admins',
             element: <AdminUsersPage />,
+          },
+          {
+            path: 'settings',
+            element: <AdminSettingsPage />,
           },
         ],
       },

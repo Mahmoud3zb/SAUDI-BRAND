@@ -1,5 +1,5 @@
 import { HeartHandshake, MessageCircle } from 'lucide-react'
-import { STORE_WHATSAPP_INTL } from '../../features/checkout/constants/egypt-regions.ts'
+import { useSettingsStore } from '../../features/settings/settings.store.ts'
 
 const ADVISOR_PROMPTS = [
   {
@@ -20,7 +20,11 @@ const ADVISOR_PROMPTS = [
 ]
 
 export function HairAdvisorBanner() {
-  const mainAdvisorUrl = `https://wa.me/${STORE_WHATSAPP_INTL}?text=${encodeURIComponent(
+  const defaultIntl = useSettingsStore((state) => state.whatsappNumberIntl)
+  const contactChannels = useSettingsStore((state) => state.contactChannels)
+  const whatsappNumberIntl = contactChannels?.advisor?.intl || defaultIntl
+
+  const mainAdvisorUrl = `https://wa.me/${whatsappNumberIntl}?text=${encodeURIComponent(
     'مرحباً، أود استشارة خبيرة سعودي براند لاختيار أفضل المنتجات المناسبة لي ✨'
   )}`
 
@@ -55,7 +59,7 @@ export function HairAdvisorBanner() {
           {ADVISOR_PROMPTS.map((prompt, idx) => (
             <a
               key={idx}
-              href={`https://wa.me/${STORE_WHATSAPP_INTL}?text=${encodeURIComponent(prompt.text)}`}
+              href={`https://wa.me/${whatsappNumberIntl}?text=${encodeURIComponent(prompt.text)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-emerald-50 text-gray-800 hover:text-emerald-900 text-xs font-bold border border-gray-200/80 hover:border-emerald-300 shadow-2xs hover:shadow-xs transition-all duration-200 cursor-pointer"

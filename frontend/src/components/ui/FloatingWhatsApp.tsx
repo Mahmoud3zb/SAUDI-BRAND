@@ -1,15 +1,21 @@
 import { useState } from 'react'
 import { MessageCircle, X } from 'lucide-react'
-import { STORE_WHATSAPP_INTL, STORE_WHATSAPP_NUMBER } from '../../features/checkout/constants/egypt-regions.ts'
+import { useSettingsStore } from '../../features/settings/settings.store.ts'
 
 export function FloatingWhatsApp() {
   const [showTooltip, setShowTooltip] = useState(true)
+  const defaultNum = useSettingsStore((state) => state.whatsappNumber)
+  const defaultIntl = useSettingsStore((state) => state.whatsappNumberIntl)
+  const contactChannels = useSettingsStore((state) => state.contactChannels)
+
+  const whatsappNumber = contactChannels?.support?.number || defaultNum
+  const whatsappNumberIntl = contactChannels?.support?.intl || defaultIntl
 
   const defaultGreeting = encodeURIComponent('مرحباً، أود الاستفسار عن منتجات وعروض المتجر ✨')
-  const waUrl = `https://wa.me/${STORE_WHATSAPP_INTL}?text=${defaultGreeting}`
+  const waUrl = `https://wa.me/${whatsappNumberIntl}?text=${defaultGreeting}`
 
   return (
-    <div className="fixed bottom-18 sm:bottom-6 start-4 sm:start-6 z-40 flex flex-col items-start gap-2 font-sans" dir="rtl">
+    <div className="fixed bottom-18 sm:bottom-6 right-4 sm:right-6 z-40 flex flex-col items-end gap-2 font-sans" dir="rtl">
       {/* Welcome Tooltip / Bubble */}
       {showTooltip && (
         <div className="relative flex items-center gap-2 rounded-2xl bg-white px-3 py-1.5 sm:px-3.5 sm:py-2 text-[11px] sm:text-xs font-bold text-gray-800 shadow-xl border border-gray-100 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -30,7 +36,7 @@ export function FloatingWhatsApp() {
         href={waUrl}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label={`تواصل عبر الواتساب على ${STORE_WHATSAPP_NUMBER}`}
+        aria-label={`تواصل عبر الواتساب على ${whatsappNumber}`}
         className="group relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-xl hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer ring-4 ring-emerald-500/20"
       >
         <span className="absolute -top-1 -end-1 flex h-3.5 w-3.5">

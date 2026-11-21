@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { AlertTriangle, Check, Edit2, Link as LinkIcon, Package, Plus, Star, Trash2, Upload, X } from 'lucide-react'
+import { AlertTriangle, Check, Copy, Edit2, Link as LinkIcon, Package, Plus, Star, Trash2, Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '../../../components/ui/Button.tsx'
 import { Input } from '../../../components/ui/Input.tsx'
@@ -118,6 +118,23 @@ export function AdminProductsPage() {
     setImageUrlText(p.imageUrl || '')
     setImageFile(null)
     setModalOpen(true)
+  }
+
+  const handleDuplicate = (p: AdminProduct) => {
+    setEditingProduct(null) // creates a new product
+    setName(`${p.name} (نسخة)`)
+    setPrice(String(p.price))
+    setOriginalPrice(p.originalPrice ? String(p.originalPrice) : '')
+    setStockQuantity(p.stockQuantity !== undefined ? String(p.stockQuantity) : '20')
+    setIsFeatured(Boolean(p.isFeatured))
+    setDescription(p.description || '')
+    const catId =
+      typeof p.categoryID === 'object' && p.categoryID !== null ? p.categoryID._id : p.categoryID
+    setCategoryID(catId)
+    setImageUrlText(p.imageUrl || '')
+    setImageFile(null)
+    setModalOpen(true)
+    toast.info('تم نسخ بيانات المنتج، يمكنك تعديل ما يلزم ثم حفظه كمنتج جديد ✨')
   }
 
   const handleCloseModal = () => {
@@ -261,6 +278,13 @@ export function AdminProductsPage() {
                         </span>
                       </td>
                       <td className="py-3 px-4 text-end space-x-1 space-x-reverse">
+                        <button
+                          onClick={() => handleDuplicate(p)}
+                          className="p-1.5 rounded-lg text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                          title="تكرار / نسخ المنتج"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </button>
                         <button
                           onClick={() => handleOpenEdit(p)}
                           className="p-1.5 rounded-lg text-gray-500 hover:text-brand-primary hover:bg-brand-soft-pink/50 transition-colors cursor-pointer"

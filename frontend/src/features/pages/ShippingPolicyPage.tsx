@@ -1,8 +1,10 @@
 import { CheckCircle2, Eye, MessageCircle, Truck } from 'lucide-react'
 import { Link } from 'react-router'
-import { STORE_WHATSAPP_INTL, STORE_WHATSAPP_NUMBER } from '../checkout/constants/egypt-regions.ts'
+import { useSettingsStore } from '../settings/settings.store.ts'
 
 export function ShippingPolicyPage() {
+  const whatsappNumber = useSettingsStore((state) => state.whatsappNumber)
+  const whatsappNumberIntl = useSettingsStore((state) => state.whatsappNumberIntl)
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 font-sans" dir="rtl">
       {/* Breadcrumb */}
@@ -89,13 +91,13 @@ export function ShippingPolicyPage() {
             <p className="text-xs text-gray-500 mt-0.5">فريق المتابعة متاح يومياً لمساعدتكِ وتتبع شحنتك فورياً.</p>
           </div>
           <a
-            href={`https://wa.me/${STORE_WHATSAPP_INTL}?text=${encodeURIComponent('مرحباً، أود الاستفسار عن حالة شحنتي.')}`}
+            href={`https://wa.me/${whatsappNumberIntl}?text=${encodeURIComponent('مرحباً، أود الاستفسار عن حالة شحنتي.')}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors shrink-0"
           >
             <MessageCircle className="h-4 w-4" />
-            <span>تواصل مع الشحن: {STORE_WHATSAPP_NUMBER}</span>
+            <span>تواصل مع الشحن: {whatsappNumber}</span>
           </a>
         </div>
       </div>

@@ -7,7 +7,7 @@ import { formatEGP } from '../../lib/formatters.ts'
 import type { Product } from '../../types/index.ts'
 import { Badge } from '../ui/Badge.tsx'
 import { Button } from '../ui/Button.tsx'
-import { STORE_WHATSAPP_INTL } from '../../features/checkout/constants/egypt-regions.ts'
+import { useSettingsStore } from '../../features/settings/settings.store.ts'
 
 export interface ProductCardProps {
   product: Product
@@ -70,10 +70,11 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
     navigate(`/products/${product.id}`)
   }
 
+  const whatsappNumberIntl = useSettingsStore((state) => state.whatsappNumberIntl)
   const quickWaText = encodeURIComponent(
     `مرحباً، أود طلب المنتج: *${product.name}* بسعر ${product.price} ج.م من المتجر.`
   )
-  const quickWaUrl = `https://wa.me/${STORE_WHATSAPP_INTL}?text=${quickWaText}`
+  const quickWaUrl = `https://wa.me/${whatsappNumberIntl}?text=${quickWaText}`
 
   return (
     <article

@@ -3,10 +3,16 @@ import { Link } from 'react-router'
 import { MessageCircle, ShieldCheck, Truck } from 'lucide-react'
 import { Button } from '../ui/Button.tsx'
 import { Input } from '../ui/Input.tsx'
-import { STORE_WHATSAPP_INTL, STORE_WHATSAPP_NUMBER } from '../../features/checkout/constants/egypt-regions.ts'
+import { useSettingsStore } from '../../features/settings/settings.store.ts'
 
 export function Footer() {
   const [email, setEmail] = useState('')
+  const defaultNum = useSettingsStore((state) => state.whatsappNumber)
+  const defaultIntl = useSettingsStore((state) => state.whatsappNumberIntl)
+  const contactChannels = useSettingsStore((state) => state.contactChannels)
+
+  const supportNumber = contactChannels?.support?.number || defaultNum
+  const supportIntl = contactChannels?.support?.intl || defaultIntl
 
   return (
     <footer className="mt-auto border-t border-gray-200 bg-white text-gray-600 font-sans" dir="rtl">
@@ -24,7 +30,7 @@ export function Footer() {
             </div>
             <div className="flex items-center gap-2">
               <MessageCircle className="h-4 w-4 text-emerald-600 shrink-0" />
-              <span>خدمة عملاء وطلب سريع عبر الواتساب: {STORE_WHATSAPP_NUMBER}</span>
+              <span>خدمة عملاء وطلب سريع عبر الواتساب: {supportNumber}</span>
             </div>
           </div>
         </div>
@@ -111,7 +117,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href={`https://wa.me/${STORE_WHATSAPP_INTL}?text=${encodeURIComponent('مرحباً، أود التحدث مع خدمة العملاء.')}`}
+                  href={`https://wa.me/${supportIntl}?text=${encodeURIComponent('مرحباً، أود التحدث مع خدمة العملاء.')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition-colors hover:text-emerald-700 text-emerald-600 font-bold"
@@ -148,20 +154,29 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-10 border-t border-gray-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
-          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-start">
-            <p>© {new Date().getFullYear()} سعودي براند - جمهورية مصر العربية. جميع الحقوق محفوظة.</p>
-            <span className="hidden sm:inline text-gray-300">•</span>
-            <span className="text-[10.5px] text-gray-400/80 tracking-wider font-mono transition-colors hover:text-gray-600 select-none">
+        <div className="mt-12 border-t border-gray-100 pt-6 pb-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-sans">
+          {/* Rights & Branding (Right side in RTL) */}
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 sm:gap-3 text-center sm:text-start text-xs text-gray-500 font-medium">
+            <span>© {new Date().getFullYear()} سعودي براند. جميع الحقوق محفوظة.</span>
+            <span className="text-gray-300 select-none">•</span>
+            <span className="text-[11px] text-gray-400 font-mono tracking-wider transition-colors hover:text-gray-600 select-none">
               powered by <span className="font-semibold text-gray-500">3zb</span>
             </span>
           </div>
-          <div className="flex items-center gap-4 text-[11px]">
-            <Link to="/shipping-policy" className="hover:text-gray-600 transition-colors">الشحن</Link>
-            <span>•</span>
-            <Link to="/return-policy" className="hover:text-gray-600 transition-colors">الاسترجاع</Link>
-            <span>•</span>
-            <Link to="/about-us" className="hover:text-gray-600 transition-colors">من نحن</Link>
+
+          {/* Quick Legal & Policy Links (Left side in RTL) */}
+          <div className="flex items-center justify-center gap-4 sm:gap-6 text-xs text-gray-500 font-medium">
+            <Link to="/shipping-policy" className="hover:text-brand-primary transition-colors py-1">
+              الشحن والتوصيل
+            </Link>
+            <span className="text-gray-300 select-none">•</span>
+            <Link to="/return-policy" className="hover:text-brand-primary transition-colors py-1">
+              سياسة الاسترجاع
+            </Link>
+            <span className="text-gray-300 select-none">•</span>
+            <Link to="/about-us" className="hover:text-brand-primary transition-colors py-1">
+              من نحن
+            </Link>
           </div>
         </div>
       </div>
