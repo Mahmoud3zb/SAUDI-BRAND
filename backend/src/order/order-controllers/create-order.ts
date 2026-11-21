@@ -10,20 +10,23 @@ export const createOrderValidation = [
     body("customerName")
         .trim()
         .notEmpty().withMessage("اسم العميل مطلوب")
-        .isLength({ min: 2 }).withMessage("يجب أن يكون الاسم حرفين على الأقل"),
+        .isLength({ min: 2, max: 70 }).withMessage("يجب أن يكون الاسم بين 2 و 70 حرفاً"),
     body("customerPhone")
         .trim()
         .notEmpty().withMessage("رقم الموبايل مطلوب")
-        .isLength({ min: 10 }).withMessage("رقم الموبايل يجب أن يكون 11 رقماً"),
+        .matches(/^(?:\+?20|0020)?0?1[0125][0-9]{8}$/).withMessage("رقم الموبايل يجب أن يكون رقم مصري صحيح مكون من 11 رقماً (مثال: 01012345678)"),
     body("shippingAddress.city")
         .trim()
         .notEmpty().withMessage("المحافظة مطلوبة"),
     body("shippingAddress.street")
         .trim()
-        .notEmpty().withMessage("العنوان / اسم الشارع بالتفصيل مطلوب"),
+        .notEmpty().withMessage("العنوان / اسم الشارع بالتفصيل مطلوب")
+        .isLength({ min: 5 }).withMessage("يرجى إدخال تفاصيل العنوان والشارع بدقة (5 أحرف على الأقل)"),
     body("shippingAddress.district").optional().trim(),
     body("shippingAddress.notes").optional().trim(),
     body("paymentMethod").optional().isIn(["cod", "vodafone_cash", "instapay", "card", "tabby", "tamara"]),
+    body("items").optional().isArray({ min: 1 }).withMessage("يجب أن تحتوي الطلبية على منتج واحد على الأقل"),
+    body("items.*.quantity").optional().isInt({ min: 1 }).withMessage("كمية المنتج يجب أن تكون رقماً صحيحاً 1 على الأقل"),
 ];
 
 export const createOrder: RequestHandler = async (req, res, next) => {
@@ -37,13 +40,23 @@ export const createOrder: RequestHandler = async (req, res, next) => {
             items: bodyItems
         } = req.body;
 
+        // Clean & normalize Egyptian phone: format as 01xxxxxxxxx
+        let normalizedPhone = String(customerPhone || "").trim().replace(/[\s\-()]/g, "");
+        if (normalizedPhone.startsWith("+20")) {
+            normalizedPhone = "0" + normalizedPhone.slice(3);
+        } else if (normalizedPhone.startsWith("0020")) {
+            normalizedPhone = "0" + normalizedPhone.slice(4);
+        } else if (normalizedPhone.length === 10 && /^[1][0125]/.test(normalizedPhone)) {
+            normalizedPhone = "0" + normalizedPhone;
+        }
+
         let itemsToOrder: Array<{ productID: string | mongoose.Types.ObjectId; quantity: number }> = [];
 
         // 1. Determine items: from client payload or from user's backend cart
         if (Array.isArray(bodyItems) && bodyItems.length > 0) {
             itemsToOrder = bodyItems.map(it => ({
                 productID: it.productID || it.id || it.product?.id,
-                quantity: Math.max(1, Number(it.quantity) || 1)
+                quantity: Math.max(1, Math.floor(Number(it.quantity) || 1))
             }));
         } else if (userID) {
             const cart = await Cart.findOne({ userID });
@@ -66,12 +79,49 @@ export const createOrder: RequestHandler = async (req, res, next) => {
             .map(it => String(it.productID))
             .filter(id => mongoose.Types.ObjectId.isValid(id));
 
+        if (validProductIDs.length !== itemsToOrder.length) {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                message: "أحد معرفات المنتجات غير صالح"
+            });
+        }
+
         const products = await Product.find({
             _id: { $in: validProductIDs }
         });
 
         const productMap = new Map(products.map(p => [p._id.toString(), p]));
 
+        // Phase 1: Stock & Status Verification (Pre-check everything before mutating stock)
+        for (const item of itemsToOrder) {
+            const prod = productMap.get(String(item.productID));
+            if (!prod) {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    message: "أحد المنتجات المطلوبة غير متوفر في المتجر حالياً"
+                });
+            }
+
+            if (prod.isActive === false) {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    message: `عفواً، المنتج «${prod.name}» غير متاح للطلب حالياً`
+                });
+            }
+
+            if (prod.stockQuantity !== undefined) {
+                if (prod.stockQuantity <= 0) {
+                    return res.status(StatusCodes.BAD_REQUEST).json({
+                        message: `عفواً، نفدت كمية المنتج «${prod.name}» من المخزون`
+                    });
+                }
+
+                if (item.quantity > prod.stockQuantity) {
+                    return res.status(StatusCodes.BAD_REQUEST).json({
+                        message: `عفواً، الكمية المطلوبة من «${prod.name}» (${item.quantity} قطع) غير متوفرة في المخزون (المتبقي: ${prod.stockQuantity} قطع فقط)`
+                    });
+                }
+            }
+        }
+
+        // Phase 2: Stock Deduction & Order Items Construction
         const orderItems: Array<{
             productID: mongoose.Types.ObjectId;
             quantity: number;
@@ -79,12 +129,7 @@ export const createOrder: RequestHandler = async (req, res, next) => {
         }> = [];
 
         for (const item of itemsToOrder) {
-            const prod = productMap.get(String(item.productID));
-            if (!prod) {
-                return res.status(StatusCodes.BAD_REQUEST).json({
-                    message: `أحد المنتجات المطلوبة غير متوفر حالياً`
-                });
-            }
+            const prod = productMap.get(String(item.productID))!;
 
             orderItems.push({
                 productID: prod._id as mongoose.Types.ObjectId,
@@ -92,10 +137,11 @@ export const createOrder: RequestHandler = async (req, res, next) => {
                 price: prod.price
             });
 
-            // Deduct inventory
-            if (prod.stockQuantity !== undefined && prod.stockQuantity > 0) {
-                prod.stockQuantity = Math.max(0, prod.stockQuantity - item.quantity);
-                await prod.save();
+            // Atomically decrement stock
+            if (prod.stockQuantity !== undefined) {
+                await Product.findByIdAndUpdate(prod._id, {
+                    $inc: { stockQuantity: -item.quantity }
+                });
             }
         }
 
@@ -105,7 +151,7 @@ export const createOrder: RequestHandler = async (req, res, next) => {
             0
         );
 
-        // 3. Compute shipping fee based on Egyptian governorates
+        // Compute shipping fee based on Egyptian governorates
         // 100 EGP: القاهرة والجيزة
         // 80 EGP: الدلتا ومحافظات القناة والإسكندرية
         // 60 EGP: الصعيد والوجه القبلي
@@ -131,13 +177,13 @@ export const createOrder: RequestHandler = async (req, res, next) => {
         // 4. Create Order document
         const order = await Order.create({
             userID: userID && mongoose.Types.ObjectId.isValid(userID) ? userID : undefined,
-            customerName,
-            customerPhone,
+            customerName: customerName.trim(),
+            customerPhone: normalizedPhone,
             shippingAddress: {
-                city: shippingAddress.city,
-                district: shippingAddress.district || "",
-                street: shippingAddress.street,
-                notes: shippingAddress.notes || ""
+                city: shippingAddress.city.trim(),
+                district: (shippingAddress.district || "").trim(),
+                street: shippingAddress.street.trim(),
+                notes: (shippingAddress.notes || "").trim()
             },
             items: orderItems,
             totalPrice: grandTotal,

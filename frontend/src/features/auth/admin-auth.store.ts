@@ -3,10 +3,12 @@ import { persist } from 'zustand/middleware'
 import { apiClient } from '../../lib/api-client.ts'
 
 export interface AdminUser {
-  id: string
+  id?: string
+  _id?: string
   name: string
   email: string
   role?: string
+  permissions?: string[]
 }
 
 interface AdminAuthState {
@@ -17,6 +19,23 @@ interface AdminAuthState {
   login: (email: string, password: string) => Promise<boolean>
   logout: () => Promise<void>
   checkAuth: () => boolean
+  isSuperAdmin: () => boolean
+  hasPermission: (permission: string) => boolean
+}
+
+function isTokenExpired(token: string | null): boolean {
+  if (!token) return true
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return true
+    const payload = JSON.parse(atob(parts[1]))
+    if (typeof payload.exp === 'number') {
+      return payload.exp * 1000 <= Date.now()
+    }
+  } catch {
+    return true
+  }
+  return false
 }
 
 export const useAdminAuthStore = create<AdminAuthState>()(
@@ -42,7 +61,8 @@ export const useAdminAuthStore = create<AdminAuthState>()(
           const user = res.user
           const token = res.token
 
-          if (user?.role !== 'admin') {
+          const isAdminRole = user?.role === 'admin' || user?.role === 'super_admin'
+          if (!isAdminRole) {
             throw new Error('غير مصرح لك بالدخول: هذا الحساب ليس حساب مدير.')
           }
 
@@ -70,7 +90,36 @@ export const useAdminAuthStore = create<AdminAuthState>()(
 
       checkAuth: () => {
         const state = get()
-        return state.isAuthenticated && Boolean(state.token) && state.admin?.role === 'admin'
+        const role = state.admin?.role
+        const isAdminRole = role === 'admin' || role === 'super_admin'
+        if (!state.isAuthenticated || !state.token || !isAdminRole) {
+          return false
+        }
+        if (isTokenExpired(state.token)) {
+          set({ admin: null, token: null, isAuthenticated: false })
+          return false
+        }
+        return true
+      },
+
+      isSuperAdmin: () => {
+        const state = get()
+        return (
+          state.admin?.role === 'super_admin' ||
+          state.admin?.email === 'admin@saudibrand.com'
+        )
+      },
+
+      hasPermission: (permission: string) => {
+        const state = get()
+        if (!state.admin) return false
+        if (
+          state.admin.role === 'super_admin' ||
+          state.admin.email === 'admin@saudibrand.com'
+        ) {
+          return true
+        }
+        return state.admin.permissions?.includes(permission) || false
       },
     }),
     {

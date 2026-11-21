@@ -171,26 +171,41 @@ export function CartDrawer() {
 
                   {/* Quantity Modifier */}
                   <div className="mt-2.5 flex items-center justify-between">
-                    <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50/70 p-0.5">
-                      <button
-                        type="button"
-                        onClick={() => updateQuantity(product.id, quantity - 1)}
-                        className="flex h-6 w-6 items-center justify-center rounded-md bg-white text-gray-600 shadow-xs hover:bg-gray-100 transition-colors cursor-pointer"
-                        aria-label={`تقليل كمية ${product.name}`}
-                      >
-                        <Minus className="h-3 w-3" aria-hidden="true" />
-                      </button>
-                      <span className="min-w-7 text-center text-xs font-bold text-gray-900">
-                        {quantity}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => updateQuantity(product.id, quantity + 1)}
-                        className="flex h-6 w-6 items-center justify-center rounded-md bg-white text-gray-600 shadow-xs hover:bg-gray-100 transition-colors cursor-pointer"
-                        aria-label={`زيادة كمية ${product.name}`}
-                      >
-                        <Plus className="h-3 w-3" aria-hidden="true" />
-                      </button>
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50/70 p-0.5">
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(product.id, quantity - 1)}
+                          className="flex h-6 w-6 items-center justify-center rounded-md bg-white text-gray-600 shadow-xs hover:bg-gray-100 transition-colors cursor-pointer"
+                          aria-label={`تقليل كمية ${product.name}`}
+                        >
+                          <Minus className="h-3 w-3" aria-hidden="true" />
+                        </button>
+                        <span className="min-w-7 text-center text-xs font-bold text-gray-900">
+                          {quantity}
+                        </span>
+                        <button
+                          type="button"
+                          disabled={product.stockQuantity !== undefined && quantity >= product.stockQuantity}
+                          onClick={() => {
+                            if (product.stockQuantity !== undefined && quantity >= product.stockQuantity) {
+                              return
+                            }
+                            updateQuantity(product.id, quantity + 1)
+                          }}
+                          className="flex h-6 w-6 items-center justify-center rounded-md bg-white text-gray-600 shadow-xs hover:bg-gray-100 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                          aria-label={`زيادة كمية ${product.name}`}
+                          title={product.stockQuantity !== undefined && quantity >= product.stockQuantity ? `الحد الأقصى المتوفر هو ${product.stockQuantity}` : undefined}
+                        >
+                          <Plus className="h-3 w-3" aria-hidden="true" />
+                        </button>
+                      </div>
+
+                      {product.stockQuantity !== undefined && quantity >= product.stockQuantity && (
+                        <span className="text-[10px] text-amber-700 font-semibold bg-amber-50 px-1.5 py-0.5 rounded">
+                          أقصى كمية
+                        </span>
+                      )}
                     </div>
 
                     {/* Line Total */}

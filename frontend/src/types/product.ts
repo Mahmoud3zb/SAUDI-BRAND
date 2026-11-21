@@ -15,6 +15,7 @@ export interface Product {
   originalPrice?: number
   imageUrl?: string
   stockStatus: StockStatus
+  stockQuantity?: number
   isFeatured?: boolean
   rating?: ProductRating
 }

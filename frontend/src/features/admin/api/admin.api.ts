@@ -22,6 +22,15 @@ export interface AdminCategory {
   createdAt: string
 }
 
+export interface AdminUser {
+  _id: string
+  name: string
+  email: string
+  role: 'super_admin' | 'admin' | 'user' | string
+  permissions?: string[]
+  createdAt?: string
+}
+
 export interface OrderItem {
   productID: { _id: string; name: string; price: number; imageUrl?: string } | string
   quantity: number
@@ -64,6 +73,8 @@ export const adminApi = {
     }),
   toggleProductStatus: (id: string) =>
     apiClient<{ message: string }>(`/product/${id}/status`, { method: 'PATCH' }),
+  deleteProduct: (id: string) =>
+    apiClient<{ message: string }>(`/product/${id}`, { method: 'DELETE' }),
 
   // Categories
   getCategories: () => apiClient<{ data: AdminCategory[] }>('/category'),
@@ -79,4 +90,17 @@ export const adminApi = {
     apiClient<{ message: string; data: AdminOrder[]; total: number }>('/order/orders'),
   updateOrderStatus: (id: string, status: string) =>
     apiClient<{ message: string }>(`/order/${id}`, { method: 'PUT', data: { status } }),
+
+  // Admins & Team Management
+  getAdmins: () =>
+    apiClient<{ message: string; data: AdminUser[]; total: number }>('/user?limit=100'),
+  addAdmin: (data: {
+    name: string
+    email: string
+    password: string
+    role?: string
+    permissions?: string[]
+  }) => apiClient<{ message: string; data: AdminUser }>('/user', { method: 'POST', data }),
+  deleteAdmin: (id: string) =>
+    apiClient<{ message: string }>(`/user/${id}`, { method: 'DELETE' }),
 }

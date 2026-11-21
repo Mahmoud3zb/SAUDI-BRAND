@@ -149,13 +149,19 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="mt-10 border-t border-gray-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
-          <p>© {new Date().getFullYear()} سعودي براند - جمهورية مصر العربية. جميع الحقوق محفوظة.</p>
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-start">
+            <p>© {new Date().getFullYear()} سعودي براند - جمهورية مصر العربية. جميع الحقوق محفوظة.</p>
+            <span className="hidden sm:inline text-gray-300">•</span>
+            <span className="text-[10.5px] text-gray-400/80 tracking-wider font-mono transition-colors hover:text-gray-600 select-none">
+              powered by <span className="font-semibold text-gray-500">3zb</span>
+            </span>
+          </div>
           <div className="flex items-center gap-4 text-[11px]">
-            <Link to="/shipping-policy" className="hover:text-gray-600">الشحن</Link>
+            <Link to="/shipping-policy" className="hover:text-gray-600 transition-colors">الشحن</Link>
             <span>•</span>
-            <Link to="/return-policy" className="hover:text-gray-600">الاسترجاع</Link>
+            <Link to="/return-policy" className="hover:text-gray-600 transition-colors">الاسترجاع</Link>
             <span>•</span>
-            <Link to="/about-us" className="hover:text-gray-600">من نحن</Link>
+            <Link to="/about-us" className="hover:text-gray-600 transition-colors">من نحن</Link>
           </div>
         </div>
       </div>

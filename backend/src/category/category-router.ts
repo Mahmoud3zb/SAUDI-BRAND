@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { handleValidationErrors } from "../middlewares/handleValidationErrors";
 import { isAuthenticated } from "../middlewares/isAuthenticated.middleware";
-import { isAuthorized } from "../middlewares/isAuthorized.middleware";
+import { isAuthorized, requirePermission } from "../middlewares/isAuthorized.middleware";
 import { Role } from "../user/user-model";
 
 import { getCategories } from "./category-controllers/get-categories";
@@ -20,6 +20,7 @@ router.post(
     "/",
     isAuthenticated,
     isAuthorized(Role.ADMIN),
+    requirePermission("manage_categories", "manage_products"),
     addCategoryValidation,
     handleValidationErrors,
     addCategory
@@ -30,6 +31,7 @@ router.put(
     "/:id",
     isAuthenticated,
     isAuthorized(Role.ADMIN),
+    requirePermission("manage_categories", "manage_products"),
     updateCategory
 );
 
@@ -37,6 +39,7 @@ router.patch(
     "/:id/deactivate",
     isAuthenticated,
     isAuthorized(Role.ADMIN),
+    requirePermission("manage_categories", "manage_products"),
     deactiviteCategory
 );
 

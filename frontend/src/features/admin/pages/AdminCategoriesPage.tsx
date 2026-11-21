@@ -2,8 +2,12 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle2, Edit2, FolderTree, Loader2, Plus, Search, XCircle } from 'lucide-react'
 import { adminApi, type AdminCategory } from '../api/admin.api.ts'
+import { useAdminAuthStore } from '../../auth/admin-auth.store.ts'
 
 export function AdminCategoriesPage() {
+  const isSuperAdmin = useAdminAuthStore((state) => state.isSuperAdmin)
+  const hasPermission = useAdminAuthStore((state) => state.hasPermission)
+
   const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -50,6 +54,19 @@ export function AdminCategoriesPage() {
 
   const categories = data?.data || []
   const filtered = categories.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
+
+  // Permission guard
+  if (!isSuperAdmin() && !hasPermission('manage_categories') && !hasPermission('manage_products')) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[360px] text-center p-8 bg-white rounded-3xl border border-gray-200">
+        <FolderTree className="h-12 w-12 text-gray-300 mb-3" />
+        <h2 className="text-lg font-bold text-gray-800">صلاحية إدارة الأقسام غير مفعلة لحسابك</h2>
+        <p className="text-xs text-gray-500 mt-1 max-w-sm">
+          يرجى مراجعة المدير العام للمتجر لمنحك صلاحية إدارة وتصنيف أقسام المتجر.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">

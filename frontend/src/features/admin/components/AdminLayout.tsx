@@ -8,28 +8,45 @@ import {
   Menu,
   ShoppingBag,
   Store,
+  Users,
   X,
 } from 'lucide-react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router'
 import { useAdminAuthStore } from '../../auth/admin-auth.store.ts'
 
 const navItems = [
-  { to: '/admin', label: 'نظرة عامة', icon: BarChart3, end: true },
-  { to: '/admin/categories', label: 'الأقسام', icon: FolderTree },
-  { to: '/admin/products', label: 'المنتجات', icon: Boxes },
-  { to: '/admin/orders', label: 'الطلبات', icon: ShoppingBag },
+  { to: '/admin', label: 'نظرة عامة', icon: BarChart3, end: true, permission: 'view_overview' },
+  { to: '/admin/categories', label: 'الأقسام', icon: FolderTree, permission: 'manage_categories' },
+  { to: '/admin/products', label: 'المنتجات', icon: Boxes, permission: 'manage_products' },
+  { to: '/admin/orders', label: 'الطلبات', icon: ShoppingBag, permission: 'manage_orders' },
+  { to: '/admin/admins', label: 'المشرفين', icon: Users, superAdminOnly: true },
 ]
 
 export function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const admin = useAdminAuthStore((state) => state.admin)
   const logout = useAdminAuthStore((state) => state.logout)
+  const isSuperAdmin = useAdminAuthStore((state) => state.isSuperAdmin)
+  const hasPermission = useAdminAuthStore((state) => state.hasPermission)
   const navigate = useNavigate()
 
   const handleLogout = async () => {
     await logout()
     navigate('/admin/login')
   }
+
+  const isSuper = isSuperAdmin()
+
+  // Filter navigation items strictly based on role and granular permissions
+  const visibleNavItems = navItems.filter((item) => {
+    if (item.superAdminOnly) {
+      return isSuper
+    }
+    if (!item.permission) {
+      return true
+    }
+    return isSuper || hasPermission(item.permission)
+  })
 
   return (
     <div
@@ -82,7 +99,7 @@ export function AdminLayout() {
 
         {/* Navigation Links */}
         <nav className="flex-1 p-3 space-y-1">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const Icon = item.icon
             return (
               <NavLink
@@ -111,7 +128,18 @@ export function AdminLayout() {
             <p className="text-xs font-bold text-gray-900 truncate">
               {admin?.name || 'مدير النظام'}
             </p>
-            <p className="text-[11px] text-gray-400 truncate">{admin?.email}</p>
+            <div className="mt-1 flex items-center gap-1.5">
+              {isSuper ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded-full">
+                  <span>👑 المدير العام (Super Admin)</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-brand-primary bg-brand-soft-pink px-2 py-0.5 rounded-full">
+                  <span>مشرف محدد الصلاحيات</span>
+                </span>
+              )}
+            </div>
+            <p className="text-[10px] text-gray-400 truncate mt-1 font-mono">{admin?.email}</p>
           </div>
 
           <div className="flex items-center gap-1">

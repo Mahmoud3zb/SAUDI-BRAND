@@ -24,25 +24,36 @@ export const useCartStore = create<CartState>()(
       isOpen: false,
 
       addItem: (product: Product, quantity = 1) => {
-        if (!product || product.stockStatus === 'out_of_stock' || quantity <= 0) {
+        const maxStock = product.stockQuantity !== undefined ? product.stockQuantity : 999
+        if (!product || product.stockStatus === 'out_of_stock' || quantity <= 0 || maxStock <= 0) {
           return false
         }
+
+        let isAdded = false
 
         set((state) => {
           const existingIndex = state.items.findIndex((item) => item.product.id === product.id)
           if (existingIndex > -1) {
             const nextItems = [...state.items]
             const existingItem = nextItems[existingIndex]
+            if (existingItem.quantity >= maxStock) {
+              isAdded = false
+              return state
+            }
+            const newQty = Math.min(maxStock, existingItem.quantity + quantity)
             nextItems[existingIndex] = {
               ...existingItem,
-              quantity: existingItem.quantity + quantity,
+              quantity: newQty,
             }
+            isAdded = true
             return { items: nextItems }
           }
-          return { items: [...state.items, { product, quantity }] }
+          const initialQty = Math.min(maxStock, quantity)
+          isAdded = true
+          return { items: [...state.items, { product, quantity: initialQty }] }
         })
 
-        return true
+        return isAdded
       },
 
       removeItem: (productId: string) => {
@@ -58,9 +69,12 @@ export const useCartStore = create<CartState>()(
         }
 
         set((state) => ({
-          items: state.items.map((item) =>
-            item.product.id === productId ? { ...item, quantity } : item,
-          ),
+          items: state.items.map((item) => {
+            if (item.product.id !== productId) return item
+            const maxStock = item.product.stockQuantity !== undefined ? item.product.stockQuantity : 999
+            const cappedQty = Math.min(maxStock, quantity)
+            return { ...item, quantity: cappedQty }
+          }),
         }))
       },
 

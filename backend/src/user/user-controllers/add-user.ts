@@ -18,13 +18,15 @@ export const addUserValidation = [
         .notEmpty().withMessage("Password is required")
         .isLength({ min: 6 }).withMessage("Password must be at least 6 characters long"),
     body("role").optional().isIn(Object.values(Role)).withMessage("Invalid role"),
+    body("permissions").optional().isArray().withMessage("Permissions must be an array of strings"),
 ]
 
-interface IRequest{
+interface IRequest {
     name: string;
     email: string;
     password: string;
-    role?: Role
+    role?: Role;
+    permissions?: string[];
 }
 
 interface IResponse {
@@ -37,7 +39,7 @@ export const addUser: RequestHandler<{}, IResponse, IRequest> = async (
     next
 ) => {
     try {
-        const { name, email, password, role } = req.body;
+        const { name, email, password, role, permissions } = req.body;
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -51,7 +53,8 @@ export const addUser: RequestHandler<{}, IResponse, IRequest> = async (
             name,
             email,
             password: hashedPassword,
-            role: role || Role.USER
+            role: role || Role.ADMIN,
+            permissions: Array.isArray(permissions) ? permissions : [],
         });
 
         const userObj = user.toObject();

@@ -15,9 +15,9 @@ export const addProductValidation = [
         .isLength({ min: 2 }).withMessage("Name must be at least 2 characters long"),
     body("price")
         .notEmpty().withMessage("Price is required")
-        .isNumeric().withMessage("Price must be a number"),
-    body("originalPrice").optional().isNumeric().withMessage("Original price must be a number"),
-    body("stockQuantity").optional().isNumeric().withMessage("Stock quantity must be a number"),
+        .isFloat({ min: 0 }).withMessage("Price must be a positive number"),
+    body("originalPrice").optional().isFloat({ min: 0 }).withMessage("Original price must be a positive number"),
+    body("stockQuantity").optional().isInt({ min: 0 }).withMessage("Stock quantity must be a non-negative integer"),
     body("isFeatured").optional().isBoolean(),
     body("description").optional().trim(),
     body("isActive").optional().isBoolean(),

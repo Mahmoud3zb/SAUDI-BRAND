@@ -98,11 +98,17 @@ export function ProductDetailPage() {
       ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
       : 0
 
+  const maxStock = product?.stockQuantity !== undefined ? product.stockQuantity : 999
+
   const handleDecrement = () => {
     setQuantity((prev) => Math.max(1, prev - 1))
   }
 
   const handleIncrement = () => {
+    if (quantity >= maxStock) {
+      toast.warning(`الكمية المتاحة في المخزون هي ${maxStock} فقط`)
+      return
+    }
     setQuantity((prev) => prev + 1)
   }
 
@@ -424,7 +430,7 @@ export function ProductDetailPage() {
                     <button
                       type="button"
                       onClick={handleIncrement}
-                      disabled={isOutOfStock}
+                      disabled={isOutOfStock || quantity >= maxStock}
                       aria-label="زيادة الكمية"
                       className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-brand-soft-pink hover:text-brand-primary disabled:opacity-40 disabled:pointer-events-none"
                     >

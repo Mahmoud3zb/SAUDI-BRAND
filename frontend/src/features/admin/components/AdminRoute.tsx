@@ -2,10 +2,10 @@ import { Navigate, Outlet } from 'react-router'
 import { useAdminAuthStore } from '../../auth/admin-auth.store.ts'
 
 export function AdminRoute() {
-  const isAuthenticated = useAdminAuthStore((state) => state.isAuthenticated)
-  const admin = useAdminAuthStore((state) => state.admin)
+  const checkAuth = useAdminAuthStore((state) => state.checkAuth)
+  const isAuth = checkAuth()
 
-  if (!isAuthenticated || admin?.role !== 'admin') {
+  if (!isAuth) {
     return <Navigate to="/admin/login" replace />
   }
 

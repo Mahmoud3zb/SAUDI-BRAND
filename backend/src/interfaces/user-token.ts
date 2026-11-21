@@ -3,6 +3,7 @@ export interface UserToken {
   id: string;
   role: Role; 
   email?: string;
-  phone?: string
+  phone?: string;
+  permissions?: string[];
   sessionId?: string;
 }

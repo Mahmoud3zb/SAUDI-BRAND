@@ -1,10 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 import { Boxes, Clock, FolderTree, RefreshCw, ShoppingBag } from 'lucide-react'
-import { Link } from 'react-router'
+import { Link, Navigate } from 'react-router'
 import { formatEGP } from '../../../lib/formatters.ts'
 import { adminApi, type AdminOrder } from '../api/admin.api.ts'
+import { useAdminAuthStore } from '../../auth/admin-auth.store.ts'
 
 export function AdminOverviewPage() {
+  const isSuperAdmin = useAdminAuthStore((state) => state.isSuperAdmin)
+  const hasPermission = useAdminAuthStore((state) => state.hasPermission)
+
   const {
     data: productsData,
     isLoading: pLoading,
@@ -31,6 +35,19 @@ export function AdminOverviewPage() {
     queryKey: ['admin', 'orders'],
     queryFn: adminApi.getOrders,
   })
+
+  // If sub-admin does not have view_overview permission, redirect to their assigned section
+  if (!isSuperAdmin() && !hasPermission('view_overview')) {
+    if (hasPermission('manage_orders')) {
+      return <Navigate to="/admin/orders" replace />
+    }
+    if (hasPermission('manage_products')) {
+      return <Navigate to="/admin/products" replace />
+    }
+    if (hasPermission('manage_categories')) {
+      return <Navigate to="/admin/categories" replace />
+    }
+  }
 
   const isLoading = pLoading || cLoading || oLoading
 

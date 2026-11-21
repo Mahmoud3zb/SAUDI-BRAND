@@ -1,16 +1,21 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, Edit2, Link as LinkIcon, Package, Plus, Power, Star, Upload, X } from 'lucide-react'
+import { AlertTriangle, Check, Edit2, Link as LinkIcon, Package, Plus, Star, Trash2, Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '../../../components/ui/Button.tsx'
 import { Input } from '../../../components/ui/Input.tsx'
 import { formatEGP } from '../../../lib/formatters.ts'
 import { adminApi, type AdminCategory, type AdminProduct } from '../api/admin.api.ts'
+import { useAdminAuthStore } from '../../auth/admin-auth.store.ts'
 
 export function AdminProductsPage() {
+  const isSuperAdmin = useAdminAuthStore((state) => state.isSuperAdmin)
+  const hasPermission = useAdminAuthStore((state) => state.hasPermission)
+
   const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<AdminProduct | null>(null)
+  const [productToDelete, setProductToDelete] = useState<AdminProduct | null>(null)
 
   // Form State
   const [name, setName] = useState('')
@@ -37,15 +42,16 @@ export function AdminProductsPage() {
   const products = productsData?.data || []
   const categories = categoriesData?.data || []
 
-  // Toggle status mutation
-  const toggleMutation = useMutation({
-    mutationFn: adminApi.toggleProductStatus,
+  // Delete product mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => adminApi.deleteProduct(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'products'] })
       queryClient.invalidateQueries({ queryKey: ['products'] })
-      toast.success('تم تحديث حالة المنتج بنجاح')
+      toast.success('تم حذف المنتج بنجاح')
+      setProductToDelete(null)
     },
-    onError: (err: Error) => toast.error(err.message || 'فشل تحديث الحالة'),
+    onError: (err: Error) => toast.error(err.message || 'فشل حذف المنتج'),
   })
 
   // Add / Edit mutation
@@ -126,6 +132,19 @@ export function AdminProductsPage() {
       return
     }
     saveMutation.mutate()
+  }
+
+  // Check permission guard after all hooks
+  if (!isSuperAdmin() && !hasPermission('manage_products')) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[360px] text-center p-8 bg-white rounded-3xl border border-gray-200">
+        <Package className="h-12 w-12 text-gray-300 mb-3" />
+        <h2 className="text-lg font-bold text-gray-800">صلاحية إدارة المنتجات غير مفعلة لحسابك</h2>
+        <p className="text-xs text-gray-500 mt-1 max-w-sm">
+          يرجى مراجعة المدير العام للمتجر لمنحك صلاحية إدارة وتعديل المنتجات والمخزون.
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -250,15 +269,11 @@ export function AdminProductsPage() {
                           <Edit2 className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => toggleMutation.mutate(p._id)}
-                          className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                            p.isActive !== false
-                              ? 'text-amber-600 hover:bg-amber-50'
-                              : 'text-emerald-600 hover:bg-emerald-50'
-                          }`}
-                          title={p.isActive !== false ? 'تعطيل المنتج' : 'تفعيل المنتج'}
+                          onClick={() => setProductToDelete(p)}
+                          className="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer"
+                          title="حذف المنتج"
                         >
-                          <Power className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </td>
                     </tr>
@@ -436,6 +451,49 @@ export function AdminProductsPage() {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Delete Confirmation Modal */}
+      {productToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-2xs">
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl border border-gray-100 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3.5 mb-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+                <AlertTriangle className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-gray-900">تأكيد حذف المنتج</h3>
+                <p className="text-xs text-gray-500 mt-0.5">عملية الحذف نهائية ولا يمكن التراجع عنها</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-600 leading-relaxed mb-6 bg-gray-50 p-3.5 rounded-2xl border border-gray-100">
+              هل أنت متأكد من رغبتك في حذف المنتج{' '}
+              <span className="font-bold text-gray-900">«{productToDelete.name}»</span>؟ سيتم مسحه
+              بالكامل من قاعدة البيانات والمتجر.
+            </p>
+
+            <div className="flex items-center justify-end gap-2.5">
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={() => setProductToDelete(null)}
+                disabled={deleteMutation.isPending}
+                className="text-xs font-semibold px-4 cursor-pointer"
+              >
+                إلغاء
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => deleteMutation.mutate(productToDelete._id)}
+                isLoading={deleteMutation.isPending}
+                className="text-xs font-bold px-5 bg-red-600 hover:bg-red-700 text-white border-transparent cursor-pointer"
+              >
+                نعم، احذف المنتج
+              </Button>
+            </div>
           </div>
         </div>
       )}

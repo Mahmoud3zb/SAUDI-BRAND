@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import bcrypt from "bcrypt";
 import { body } from "express-validator";
-import { User } from "../user/user-model";
+import { Role, User } from "../user/user-model";
 import { jwtService } from "../services/jwt-service";
 
 export const loginValidation = [
@@ -44,24 +44,39 @@ export const loginHandler: RequestHandler = async (req, res, next) => {
                         return res.status(401).json({ message: "Invalid email or password" });
                 }
 
+                const isSuper = user.role === Role.SUPER_ADMIN || user.email === "admin@saudibrand.com";
+                const userPermissions = isSuper
+                        ? ["manage_products", "manage_categories", "manage_orders", "view_overview", "manage_admins"]
+                        : (user.permissions || []);
+
                 const token = jwtService.createToken(
-                        { id: user._id, email: user.email, role: user.role },
-                        { expiresIn: "2h" }
+                        {
+                                id: user._id,
+                                email: user.email,
+                                role: isSuper ? Role.SUPER_ADMIN : user.role,
+                                permissions: userPermissions,
+                        },
+                        { expiresIn: "7d" }
                 );
 
                 const refreshToken = jwtService.createToken(
-                        { id: user._id, email: user.email, role: user.role },
-                        { expiresIn: "7d" }
+                        {
+                                id: user._id,
+                                email: user.email,
+                                role: isSuper ? Role.SUPER_ADMIN : user.role,
+                                permissions: userPermissions,
+                        },
+                        { expiresIn: "30d" }
                 );
 
                 res.cookie("token", token, {
                         ...COOKIE_OPTIONS,
-                        maxAge: 2 * 60 * 60 * 1000,
+                        maxAge: 7 * 24 * 60 * 60 * 1000,
                 });
 
                 res.cookie("refreshToken", refreshToken, {
                         ...COOKIE_OPTIONS,
-                        maxAge: 7 * 24 * 60 * 60 * 1000,
+                        maxAge: 30 * 24 * 60 * 60 * 1000,
                 });
 
                 const userObj = user.toObject();
@@ -70,7 +85,11 @@ export const loginHandler: RequestHandler = async (req, res, next) => {
                 return res.status(200).json({
                         message: "Logged in successfully",
                         token,
-                        user: userWithoutPassword
+                        user: {
+                                ...userWithoutPassword,
+                                role: isSuper ? Role.SUPER_ADMIN : user.role,
+                                permissions: userPermissions,
+                        }
                 });
         } catch (err) {
                 next(err);

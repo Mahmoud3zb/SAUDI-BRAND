@@ -32,21 +32,25 @@ async function ensureAdminUser() {
         const adminEmail = "admin@saudibrand.com";
         const hashedPassword = await bcrypt.hash("admin123", 10);
         const existing = await User.findOne({ email: adminEmail });
+        const allPermissions = ["manage_products", "manage_categories", "manage_orders", "view_overview", "manage_admins"];
+
         if (!existing) {
             await User.create({
-                name: "مدير سعودي براند",
+                name: "المدير العام (مالك المتجر)",
                 email: adminEmail,
                 password: hashedPassword,
-                role: Role.ADMIN
+                role: Role.SUPER_ADMIN,
+                permissions: allPermissions,
             });
-            console.log("✅ Admin user ready: admin@saudibrand.com / admin123");
+            console.log("✅ Super Admin user ready: admin@saudibrand.com / admin123");
         } else {
             const matches = await bcrypt.compare("admin123", existing.password);
-            if (!matches || existing.role !== Role.ADMIN) {
+            if (!matches || existing.role !== Role.SUPER_ADMIN || !existing.permissions || existing.permissions.length === 0) {
                 existing.password = hashedPassword;
-                existing.role = Role.ADMIN;
+                existing.role = Role.SUPER_ADMIN;
+                existing.permissions = allPermissions;
                 await existing.save();
-                console.log("✅ Admin user password reset to admin123");
+                console.log("✅ Super Admin role and full permissions updated: admin@saudibrand.com");
             }
         }
     } catch (e) {

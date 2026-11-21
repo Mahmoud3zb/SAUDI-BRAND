@@ -10,13 +10,19 @@ export const getUsers: RequestHandler = async (req, res, next) => {
             100,
             Math.max(1, Number(req.query.limit) || 10)
         );
+
+        const filter: Record<string, any> = {};
+        if (req.query.role) {
+            filter.role = req.query.role;
+        }
+
         const [users, total] = await Promise.all([
-            User.find()
+            User.find(filter)
                 .select("-password")
                 .sort({ createdAt: -1 })
                 .skip((page - 1) * limit)
                 .limit(limit),
-            User.countDocuments()
+            User.countDocuments(filter)
         ])
         return res.status(StatusCodes.OK).json({
             message: "Users fetched successfully",

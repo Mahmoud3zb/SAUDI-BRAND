@@ -1,11 +1,10 @@
 import mongoose from "mongoose";
 
-export enum Role{
+export enum Role {
+    SUPER_ADMIN = "super_admin",
     ADMIN = "admin",
     USER = "user"
 }
-
-
 
 export interface IAddress {
     street?: string;
@@ -18,6 +17,7 @@ export interface IUser extends mongoose.Document {
     email: string;
     password: string;
     role?: Role;
+    permissions?: string[];
     address?: IAddress;
     profileImage?: string;
     passwordResetToken?: string;
@@ -46,6 +46,10 @@ const UserSchema = new mongoose.Schema<IUser>({
         type: String,
         enum: Object.values(Role),
         default: Role.USER
+    },
+    permissions: {
+        type: [String],
+        default: []
     },
     address: {
         street: { type: String, trim: true },

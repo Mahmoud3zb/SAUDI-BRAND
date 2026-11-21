@@ -8,9 +8,9 @@ import { body } from "express-validator";
 export const updateProductValidation = [
     body("categoryID").optional().isMongoId().withMessage("Invalid category ID format"),
     body("name").optional().trim().isLength({ min: 2 }).withMessage("Name must be at least 2 characters long"),
-    body("price").optional().isNumeric().withMessage("Price must be a number"),
-    body("originalPrice").optional().isNumeric().withMessage("Original price must be a number"),
-    body("stockQuantity").optional().isNumeric().withMessage("Stock quantity must be a number"),
+    body("price").optional().isFloat({ min: 0 }).withMessage("Price must be a positive number"),
+    body("originalPrice").optional().isFloat({ min: 0 }).withMessage("Original price must be a positive number"),
+    body("stockQuantity").optional().isInt({ min: 0 }).withMessage("Stock quantity must be a non-negative integer"),
     body("isFeatured").optional().isBoolean(),
     body("description").optional().trim(),
 ];

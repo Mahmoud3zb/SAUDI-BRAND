@@ -13,6 +13,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import { adminApi } from '../api/admin.api.ts'
+import { useAdminAuthStore } from '../../auth/admin-auth.store.ts'
 
 const STATUS_LABELS: Record<string, { label: string; color: string; icon: typeof Clock }> = {
   pending: {
@@ -39,9 +40,13 @@ export function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
+  const isSuperAdmin = useAdminAuthStore((state) => state.isSuperAdmin)
+  const hasPermission = useAdminAuthStore((state) => state.hasPermission)
+
   const { data, isLoading } = useQuery({
     queryKey: ['admin', 'orders'],
     queryFn: adminApi.getOrders,
+    enabled: isSuperAdmin() || hasPermission('manage_orders'),
   })
 
   const statusMutation = useMutation({
@@ -66,6 +71,19 @@ export function AdminOrdersPage() {
         (user?.email && user.email.toLowerCase().includes(searchLower)))
     )
   })
+
+  // Permission guard
+  if (!isSuperAdmin() && !hasPermission('manage_orders')) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[360px] text-center p-8 bg-white rounded-3xl border border-gray-200 font-sans" dir="rtl">
+        <ShoppingBag className="h-12 w-12 text-gray-300 mb-3" />
+        <h2 className="text-lg font-bold text-gray-800">صلاحية إدارة الطلبات غير مفعلة لحسابك</h2>
+        <p className="text-xs text-gray-500 mt-1 max-w-sm">
+          يرجى مراجعة المدير العام للمتجر لمنحك صلاحية إدارة وتأكيد الطلبات والشحن.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">

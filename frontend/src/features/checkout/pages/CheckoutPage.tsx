@@ -76,15 +76,23 @@ export function CheckoutPage() {
     }
 
     // Validate Egyptian phone number (11 digits, starts with 010, 011, 012, or 015)
-    const cleanPhone = customerPhone.trim().replace(/\s+/g, '')
+    let cleanPhone = customerPhone.trim().replace(/[\s\-()]/g, '')
+    if (cleanPhone.startsWith('+20')) {
+      cleanPhone = '0' + cleanPhone.slice(3)
+    } else if (cleanPhone.startsWith('0020')) {
+      cleanPhone = '0' + cleanPhone.slice(4)
+    } else if (cleanPhone.length === 10 && /^[1][0125]/.test(cleanPhone)) {
+      cleanPhone = '0' + cleanPhone
+    }
+
     const egyptianPhoneRegex = /^01[0125][0-9]{8}$/
     if (!egyptianPhoneRegex.test(cleanPhone)) {
       toast.error('يرجى إدخال رقم موبايل مصري صحيح مكون من 11 رقماً (مثال: 01012345678)')
       return
     }
 
-    if (!street.trim()) {
-      toast.error('يرجى إدخال تفاصيل العنوان (الشارع / رقم العمارة / الشقة)')
+    if (!street.trim() || street.trim().length < 5) {
+      toast.error('يرجى إدخال تفاصيل العنوان والشارع بدقة (5 أحرف على الأقل)')
       return
     }
 

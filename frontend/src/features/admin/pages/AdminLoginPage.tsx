@@ -58,7 +58,7 @@ export function AdminLoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@saudibrand.com"
+                placeholder="name@example.com"
                 startIcon={<Mail className="h-4 w-4 text-gray-400" />}
                 className="w-full"
               />
@@ -87,25 +87,6 @@ export function AdminLoginPage() {
               تسجيل الدخول
             </Button>
           </form>
-
-          {/* Quick Demo Fill */}
-          <div className="mt-4 p-3 bg-brand-soft-pink/40 border border-brand-primary/20 rounded-xl text-center">
-            <p className="text-[11px] text-gray-600 mb-1.5">
-              بيانات الدخول للتجربة:{' '}
-              <span className="font-mono font-bold text-gray-800">admin@saudibrand.com</span> /{' '}
-              <span className="font-mono font-bold text-gray-800">admin123</span>
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setEmail('admin@saudibrand.com')
-                setPassword('admin123')
-              }}
-              className="text-[11px] font-bold text-brand-primary hover:underline cursor-pointer"
-            >
-              اضغط هنا لتعبئة البيانات تلقائياً
-            </button>
-          </div>
 
           <div className="mt-6 border-t border-gray-100 pt-4 text-center">
             <Link

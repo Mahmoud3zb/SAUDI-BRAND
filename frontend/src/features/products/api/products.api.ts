@@ -53,6 +53,7 @@ function mapBackendProduct(p: BackendProduct): Product {
     description: p.description,
     categoryId: catId,
     stockStatus,
+    stockQuantity: p.stockQuantity,
     isFeatured: p.isFeatured,
     rating: p.rating || { score: 4.8, count: 12 },
   }

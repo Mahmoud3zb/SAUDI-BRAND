@@ -2,7 +2,7 @@ import { Router } from "express";
 import { upload } from "../middlewares/upload";
 import { handleValidationErrors } from "../middlewares/handleValidationErrors";
 import { isAuthenticated } from "../middlewares/isAuthenticated.middleware";
-import { isAuthorized } from "../middlewares/isAuthorized.middleware";
+import { isAuthorized, requirePermission } from "../middlewares/isAuthorized.middleware";
 import { Role } from "../user/user-model";
 
 import { getProducts } from "./product-controllers/get-produts";
@@ -10,6 +10,7 @@ import { getProduct } from "./product-controllers/get-product";
 import { addProduct, addProductValidation } from "./product-controllers/add-product";
 import { updateProduct, updateProductValidation } from "./product-controllers/update-products";
 import { changeProductStatus } from "./product-controllers/change-product-status";
+import { deleteProduct } from "./product-controllers/delete-product";
 
 const router = Router();
 
@@ -22,6 +23,7 @@ router.post(
     "/",
     isAuthenticated,
     isAuthorized(Role.ADMIN),
+    requirePermission("manage_products"),
     upload.single("imageUrl"),
     addProductValidation,
     handleValidationErrors,
@@ -33,6 +35,7 @@ router.put(
     "/:id",
     isAuthenticated,
     isAuthorized(Role.ADMIN),
+    requirePermission("manage_products"),
     upload.single("imageUrl"),
     updateProductValidation,
     handleValidationErrors,
@@ -43,7 +46,16 @@ router.patch(
     "/:id/status",
     isAuthenticated,
     isAuthorized(Role.ADMIN),
+    requirePermission("manage_products"),
     changeProductStatus
+);
+
+router.delete(
+    "/:id",
+    isAuthenticated,
+    isAuthorized(Role.ADMIN),
+    requirePermission("manage_products"),
+    deleteProduct
 );
 
 export default router;
