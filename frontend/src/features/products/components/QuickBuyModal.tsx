@@ -20,6 +20,8 @@ import {
   EGYPT_GOVERNORATES,
   getGovernorateShippingFee,
 } from '../../checkout/constants/egypt-regions.ts'
+import { buildWhatsAppLink, formatWhatsAppMessage } from '../../checkout/utils/whatsapp.ts'
+import { useSettingsStore } from '../../settings/settings.store.ts'
 import type { Product } from '../../../types/product.ts'
 
 interface QuickBuyModalProps {
@@ -44,6 +46,10 @@ export function QuickBuyModal({
   const [notes, setNotes] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'vodafone_cash' | 'instapay'>('cod')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const defaultIntl = useSettingsStore((state) => state.whatsappNumberIntl)
+  const contactChannels = useSettingsStore((state) => state.contactChannels)
+  const ordersWhatsappIntl = contactChannels?.orders?.intl || defaultIntl
 
   if (!isOpen) return null
 
@@ -116,12 +122,44 @@ export function QuickBuyModal({
       })
 
       const placedOrder = res?.order
-      toast.success('تم تأكيد طلبك بنجاح! سيتم التواصل معك للتسليم')
+      const orderId = placedOrder?._id
+
+      // 2. Prepare detailed WhatsApp message connected to the Orders WhatsApp number from Settings
+      const waMessage = formatWhatsAppMessage({
+        orderId,
+        customerName: trimmedName,
+        customerPhone: cleanPhone,
+        city,
+        street: trimmedStreet,
+        notes: notes.trim() || undefined,
+        items: [
+          {
+            name: product.name,
+            quantity,
+            price: product.price,
+          },
+        ],
+        subtotal,
+        shippingFee,
+        totalAmount: total,
+        paymentMethod,
+      })
+
+      const waLink = buildWhatsAppLink(waMessage, ordersWhatsappIntl)
+
+      // 3. Open WhatsApp directly in new tab
+      try {
+        window.open(waLink, '_blank')
+      } catch {
+        // Pop-up blocked fallback handled by OrderSuccessPage
+      }
+
+      toast.success('تم تأكيد طلبك بنجاح! جارٍ تحويلك للواتساب...')
       onClose()
 
-      if (placedOrder?._id) {
-        navigate(`/order-success/${placedOrder._id}`, {
-          state: { order: placedOrder },
+      if (orderId) {
+        navigate(`/order-success/${orderId}`, {
+          state: { order: placedOrder, waMessage, waLink },
         })
       } else {
         navigate('/')
