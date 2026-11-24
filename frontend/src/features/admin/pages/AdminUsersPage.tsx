@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import {
   AlertCircle,
   CheckCircle2,
@@ -118,11 +119,12 @@ export function AdminUsersPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
       setDeleteTarget(null)
+      toast.success('تم حذف المشرف بنجاح')
       setActionSuccess('تم حذف المشرف بنجاح')
       setTimeout(() => setActionSuccess(null), 4000)
     },
     onError: (err: unknown) => {
-      alert(err instanceof Error ? err.message : 'فشل حذف المشرف')
+      toast.error(err instanceof Error ? err.message : 'فشل حذف المشرف')
       setDeleteTarget(null)
     },
   })

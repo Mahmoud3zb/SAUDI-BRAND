@@ -11,12 +11,14 @@ import {
   RefreshCw,
   ShoppingBag,
   Star,
+  Zap,
 } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { ProductCard } from '../../../components/product/ProductCard.tsx'
 import { Badge } from '../../../components/ui/Badge.tsx'
 import { Button } from '../../../components/ui/Button.tsx'
+import { QuickBuyModal } from '../components/QuickBuyModal.tsx'
 import { useCartStore } from '../../cart/cart.store.ts'
 import { useCategories } from '../hooks/useCategories.ts'
 import { useProduct, useProductsByCategory } from '../hooks/useProducts.ts'
@@ -30,6 +32,7 @@ export function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1)
   const [imageError, setImageError] = useState(false)
   const [isAdded, setIsAdded] = useState(false)
+  const [isQuickBuyOpen, setIsQuickBuyOpen] = useState(false)
   const isProcessingRef = useRef(false)
 
   const addItem = useCartStore((state) => state.addItem)
@@ -469,8 +472,18 @@ export function ProductDetailPage() {
                 </div>
               </div>
 
+              {/* 1-Click Quick Buy Button */}
+              <button
+                type="button"
+                disabled={isOutOfStock}
+                onClick={() => setIsQuickBuyOpen(true)}
+                className="w-full mt-3 flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl font-black text-sm bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50 active:scale-[0.99]"
+              >
+                <span>اطلب الآن بضغطة واحدة (شراء سريع)</span>
+              </button>
+
               {/* Quick WhatsApp Order Button */}
-              <div className="mt-3">
+              <div className="mt-2.5">
                 <a
                   href={`https://wa.me/${useSettingsStore.getState().whatsappNumberIntl}?text=${encodeURIComponent(
                     `مرحباً، أود طلب المنتج: *${product.name}* (الكمية: ${quantity}) بسعر إجمالي ${product.price * quantity} ج.م من المتجر.`
@@ -524,6 +537,59 @@ export function ProductDetailPage() {
           </section>
         )}
       </div>
+
+      {/* Mobile Floating Sticky Buy Bar */}
+      {product && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200/90 p-3 shadow-2xl safe-area-pb animate-in slide-in-from-bottom duration-300">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              {product.imageUrl && (
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="w-10 h-10 object-cover rounded-xl border border-gray-200 shrink-0 bg-white"
+                />
+              )}
+              <div className="min-w-0">
+                <p className="text-[11px] font-bold text-gray-900 truncate">{product.name}</p>
+                <span className="text-xs font-black text-brand-primary font-sans">{formatEGP(product.price)}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                disabled={isOutOfStock}
+                onClick={handleAddToCart}
+                className="p-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 text-xs font-bold transition-colors cursor-pointer"
+                title="أضف للسلة"
+              >
+                <ShoppingBag className="h-4 w-4" />
+              </button>
+
+              <button
+                type="button"
+                disabled={isOutOfStock}
+                onClick={() => setIsQuickBuyOpen(true)}
+                className="flex items-center gap-1 py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-black shadow-xs hover:opacity-95 transition-all cursor-pointer"
+              >
+                <Zap className="h-3.5 w-3.5" />
+                <span>شراء سريع ⚡</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Buy Modal */}
+      {product && (
+        <QuickBuyModal
+          isOpen={isQuickBuyOpen}
+          onClose={() => setIsQuickBuyOpen(false)}
+          product={product}
+          initialQuantity={quantity}
+        />
+      )}
     </main>
   )
 }

@@ -10,13 +10,6 @@ import { ReturnPolicyPage } from '../features/pages/ReturnPolicyPage.tsx'
 import { AboutUsPage } from '../features/pages/AboutUsPage.tsx'
 import { AdminRoute } from '../features/admin/components/AdminRoute.tsx'
 import { AdminLayout } from '../features/admin/components/AdminLayout.tsx'
-import { AdminLoginPage } from '../features/admin/pages/AdminLoginPage.tsx'
-import { AdminOverviewPage } from '../features/admin/pages/AdminOverviewPage.tsx'
-import { AdminProductsPage } from '../features/admin/pages/AdminProductsPage.tsx'
-import { AdminCategoriesPage } from '../features/admin/pages/AdminCategoriesPage.tsx'
-import { AdminOrdersPage } from '../features/admin/pages/AdminOrdersPage.tsx'
-import { AdminUsersPage } from '../features/admin/pages/AdminUsersPage.tsx'
-import { AdminSettingsPage } from '../features/admin/pages/AdminSettingsPage.tsx'
 
 export const router = createBrowserRouter([
   {
@@ -63,7 +56,10 @@ export const router = createBrowserRouter([
   },
   {
     path: '/admin/login',
-    element: <AdminLoginPage />,
+    lazy: () =>
+      import('../features/admin/pages/AdminLoginPage.tsx').then((m) => ({
+        Component: m.AdminLoginPage,
+      })),
   },
   {
     path: '/admin',
@@ -74,27 +70,52 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <AdminOverviewPage />,
+            lazy: () =>
+              import('../features/admin/pages/AdminOverviewPage.tsx').then((m) => ({
+                Component: m.AdminOverviewPage,
+              })),
+          },
+          {
+            path: 'finance',
+            lazy: () =>
+              import('../features/admin/pages/AdminFinancePage.tsx').then((m) => ({
+                Component: m.AdminFinancePage,
+              })),
           },
           {
             path: 'products',
-            element: <AdminProductsPage />,
+            lazy: () =>
+              import('../features/admin/pages/AdminProductsPage.tsx').then((m) => ({
+                Component: m.AdminProductsPage,
+              })),
           },
           {
             path: 'categories',
-            element: <AdminCategoriesPage />,
+            lazy: () =>
+              import('../features/admin/pages/AdminCategoriesPage.tsx').then((m) => ({
+                Component: m.AdminCategoriesPage,
+              })),
           },
           {
             path: 'orders',
-            element: <AdminOrdersPage />,
+            lazy: () =>
+              import('../features/admin/pages/AdminOrdersPage.tsx').then((m) => ({
+                Component: m.AdminOrdersPage,
+              })),
           },
           {
             path: 'admins',
-            element: <AdminUsersPage />,
+            lazy: () =>
+              import('../features/admin/pages/AdminUsersPage.tsx').then((m) => ({
+                Component: m.AdminUsersPage,
+              })),
           },
           {
             path: 'settings',
-            element: <AdminSettingsPage />,
+            lazy: () =>
+              import('../features/admin/pages/AdminSettingsPage.tsx').then((m) => ({
+                Component: m.AdminSettingsPage,
+              })),
           },
         ],
       },

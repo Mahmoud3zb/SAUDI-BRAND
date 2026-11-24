@@ -5,6 +5,7 @@ export interface AdminProduct {
   name: string
   price: number
   originalPrice?: number
+  costPrice?: number
   stockQuantity?: number
   isFeatured?: boolean
   imageUrl: string
@@ -58,6 +59,74 @@ export interface AdminOrder {
   updatedAt: string
 }
 
+export interface ExpenseItem {
+  _id: string
+  title: string
+  amount: number
+  category: 'ads' | 'packaging' | 'salaries' | 'shipping' | 'rent' | 'utilities' | 'other'
+  date: string
+  notes?: string
+  createdBy?: { _id: string; name: string; email: string }
+  createdAt: string
+}
+
+export interface WasteItem {
+  _id: string
+  productID?: { _id: string; name: string; price: number; imageUrl?: string; costPrice?: number }
+  productName: string
+  quantity: number
+  costPerUnit: number
+  totalCost: number
+  reason: 'shipping_damage' | 'manufacturing_defect' | 'tester_sample' | 'storage_loss' | 'other'
+  date: string
+  notes?: string
+  createdBy?: { _id: string; name: string; email: string }
+  createdAt: string
+}
+
+export interface FinanceSummary {
+  period: 'daily' | 'monthly' | 'yearly' | 'custom'
+  label: string
+  dateRange: { start: string; end: string }
+  current: {
+    grossRevenue: number
+    shippingRevenue: number
+    netProductRevenue: number
+    totalCOGS: number
+    grossProfit: number
+    ordersCount: number
+    totalItemsSold: number
+    totalExpenses: number
+    expensesByCategory: Record<string, number>
+    expensesList: ExpenseItem[]
+    totalWaste: number
+    totalWasteQuantity: number
+    wasteByReason: Record<string, number>
+    wasteList: WasteItem[]
+    netProfit: number
+    profitMargin: number
+  }
+  previous: {
+    grossRevenue: number
+    netProfit: number
+    totalExpenses: number
+    totalWaste: number
+  }
+  trends: {
+    revenueGrowth: number
+    netProfitGrowth: number
+  }
+  monthlyChart?: Array<{
+    monthIndex: number
+    monthName: string
+    revenue: number
+    cogs: number
+    expenses: number
+    waste: number
+    netProfit: number
+  }>
+}
+
 export const adminApi = {
   // Products
   getProducts: () => apiClient<{ data: AdminProduct[]; total: number }>('/product?limit=100'),
@@ -103,4 +172,56 @@ export const adminApi = {
   }) => apiClient<{ message: string; data: AdminUser }>('/user', { method: 'POST', data }),
   deleteAdmin: (id: string) =>
     apiClient<{ message: string }>(`/user/${id}`, { method: 'DELETE' }),
+
+  // Finance & Profit Breakdown
+  getFinanceSummary: (period: string = 'daily', from?: string, to?: string) => {
+    let url = `/finance/summary?period=${encodeURIComponent(period)}`
+    if (from) url += `&from=${encodeURIComponent(from)}`
+    if (to) url += `&to=${encodeURIComponent(to)}`
+    return apiClient<FinanceSummary>(url)
+  },
+  getExpenses: (params?: { page?: number; limit?: number; category?: string; search?: string }) => {
+    const q = new URLSearchParams()
+    if (params?.page) q.set('page', String(params.page))
+    if (params?.limit) q.set('limit', String(params.limit))
+    if (params?.category) q.set('category', params.category)
+    if (params?.search) q.set('search', params.search)
+    return apiClient<{
+      data: ExpenseItem[]
+      pagination: { total: number; page: number; limit: number; pages: number }
+    }>(`/finance/expenses?${q.toString()}`)
+  },
+  createExpense: (data: {
+    title: string
+    amount: number
+    category: string
+    date?: string
+    notes?: string
+  }) => apiClient<{ message: string; data: ExpenseItem }>('/finance/expenses', { method: 'POST', data }),
+  deleteExpense: (id: string) =>
+    apiClient<{ message: string }>(`/finance/expenses/${id}`, { method: 'DELETE' }),
+
+  getWaste: (params?: { page?: number; limit?: number; reason?: string; search?: string }) => {
+    const q = new URLSearchParams()
+    if (params?.page) q.set('page', String(params.page))
+    if (params?.limit) q.set('limit', String(params.limit))
+    if (params?.reason) q.set('reason', params.reason)
+    if (params?.search) q.set('search', params.search)
+    return apiClient<{
+      data: WasteItem[]
+      pagination: { total: number; page: number; limit: number; pages: number }
+    }>(`/finance/waste?${q.toString()}`)
+  },
+  createWaste: (data: {
+    productID?: string
+    productName: string
+    quantity: number
+    costPerUnit: number
+    reason: string
+    date?: string
+    notes?: string
+    deductFromStock?: boolean
+  }) => apiClient<{ message: string; data: WasteItem }>('/finance/waste', { method: 'POST', data }),
+  deleteWaste: (id: string) =>
+    apiClient<{ message: string }>(`/finance/waste/${id}`, { method: 'DELETE' }),
 }

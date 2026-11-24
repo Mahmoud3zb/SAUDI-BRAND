@@ -106,7 +106,7 @@ export function CheckoutPage() {
 
     const egyptianPhoneRegex = /^01[0125][0-9]{8}$/
     if (!egyptianPhoneRegex.test(cleanPhone)) {
-      toast.error('يرجى إدخال رقم موبايل مصري صحيح مكون من 11 رقماً (مثال: 01012345678)')
+      toast.error('يرجى إدخال رقم موبايل مصري صحيح مكون من 11 رقماً يبدأ بـ 01')
       return
     }
 
@@ -212,7 +212,7 @@ export function CheckoutPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form noValidate onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Right Column: Customer Info & Shipping Address (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
@@ -233,7 +233,7 @@ export function CheckoutPage() {
                   <Input
                     type="text"
                     required
-                    placeholder="مثال: ياسمين أحمد"
+                    placeholder="اكتب اسمك بالكامل"
                     startIcon={<User className="h-4 w-4 text-gray-400" />}
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
@@ -248,7 +248,7 @@ export function CheckoutPage() {
                     type="tel"
                     required
                     dir="ltr"
-                    placeholder="01012345678"
+                    placeholder="01xxxxxxxxx"
                     startIcon={<Phone className="h-4 w-4 text-gray-400" />}
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
@@ -301,7 +301,7 @@ export function CheckoutPage() {
                     </label>
                     <Input
                       type="text"
-                      placeholder="مثال: مدينة نصر، المعادي، سموحة..."
+                      placeholder="اسم المنطقة أو الحي أو المركز..."
                       startIcon={<MapPin className="h-4 w-4 text-gray-400" />}
                       value={district}
                       onChange={(e) => setDistrict(e.target.value)}

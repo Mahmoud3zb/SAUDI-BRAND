@@ -10,6 +10,7 @@ export const updateProductValidation = [
     body("name").optional().trim().isLength({ min: 2 }).withMessage("Name must be at least 2 characters long"),
     body("price").optional().isFloat({ min: 0 }).withMessage("Price must be a positive number"),
     body("originalPrice").optional().isFloat({ min: 0 }).withMessage("Original price must be a positive number"),
+    body("costPrice").optional().isFloat({ min: 0 }).withMessage("Cost price must be a non-negative number"),
     body("stockQuantity").optional().isInt({ min: 0 }).withMessage("Stock quantity must be a non-negative integer"),
     body("isFeatured").optional().isBoolean(),
     body("description").optional().trim(),
@@ -20,6 +21,7 @@ interface IRequest {
     name?: string;
     price?: number;
     originalPrice?: number;
+    costPrice?: number;
     stockQuantity?: number;
     isFeatured?: boolean;
     slug?: string;
@@ -38,6 +40,7 @@ export const updateProduct: RequestHandler<{ id: string }, IResponse, IRequest> 
             name,
             price,
             originalPrice,
+            costPrice,
             stockQuantity,
             isFeatured,
             slug,
@@ -57,6 +60,7 @@ export const updateProduct: RequestHandler<{ id: string }, IResponse, IRequest> 
         if (name) updateObject.name = name;
         if (price !== undefined) updateObject.price = Number(price);
         if (originalPrice !== undefined) updateObject.originalPrice = Number(originalPrice);
+        if (costPrice !== undefined) updateObject.costPrice = Number(costPrice);
         if (stockQuantity !== undefined) updateObject.stockQuantity = Number(stockQuantity);
         if (isFeatured !== undefined) updateObject.isFeatured = Boolean(isFeatured);
         if (slug) updateObject.slug = slug;

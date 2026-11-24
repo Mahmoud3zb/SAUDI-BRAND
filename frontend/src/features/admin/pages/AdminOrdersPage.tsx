@@ -42,6 +42,17 @@ const STATUS_LABELS: Record<string, { label: string; color: string; icon: typeof
   cancelled: { label: 'ملغي', color: 'bg-red-50 text-red-600 border-red-200', icon: XCircle },
 }
 
+function getCustomerWhatsAppUrl(phone?: string, message?: string): string {
+  if (!phone) return '#'
+  const cleanPhone = phone.replace(/\D/g, '')
+  const intlPhone = cleanPhone.startsWith('01')
+    ? `20${cleanPhone}`
+    : cleanPhone.startsWith('20')
+      ? cleanPhone
+      : `20${cleanPhone}`
+  return `https://wa.me/${intlPhone}?text=${encodeURIComponent(message || '')}`
+}
+
 export function AdminOrdersPage() {
   const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
@@ -122,66 +133,129 @@ export function AdminOrdersPage() {
           </p>
         </div>
 
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          onClick={() => {
-            if (filteredOrders.length === 0) {
-              toast.error('لا توجد طلبات لتصديرها')
-              return
-            }
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Courier Shipping Sheet Export */}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              if (filteredOrders.length === 0) {
+                toast.error('لا توجد طلبات لتصديرها')
+                return
+              }
 
-            const headers = [
-              'رقم الطلب',
-              'تاريخ الطلب',
-              'اسم العميل',
-              'رقم الموبايل',
-              'المحافظة',
-              'العنوان بالتفصيل',
-              'طريقة الدفع',
-              'حالة الطلب',
-              'المبلغ الإجمالي',
-              'المنتجات',
-            ]
+              const headers = [
+                'اسم المستلم',
+                'رقم الهاتف',
+                'المحافظة',
+                'العنوان بالتفصيل',
+                'قيمة التحصيل عند الاستلام (COD)',
+                'محتوى الشحنة',
+                'رقم الأوردر المرجعي',
+                'ملاحظات التوصيل',
+              ]
 
-            const rows = filteredOrders.map((o) => {
-              const itemsStr = (o.items || [])
-                .map((it) => {
-                  const p = typeof it.productID === 'object' && it.productID !== null ? it.productID.name : ''
-                  return `${p} (${it.quantity})`
-                })
-                .join(' + ')
+              const rows = filteredOrders.map((o) => {
+                const itemsStr = (o.items || [])
+                  .map((it) => {
+                    const p = typeof it.productID === 'object' && it.productID !== null ? it.productID.name : ''
+                    return `${p} (x${it.quantity})`
+                  })
+                  .join(' + ')
 
-              return [
-                `#${o._id.slice(-6).toUpperCase()}`,
-                o.createdAt ? new Date(o.createdAt).toLocaleDateString('ar-EG') : '',
-                `"${(o.customerName || '').replace(/"/g, '""')}"`,
-                `"${(o.customerPhone || '').replace(/"/g, '""')}"`,
-                `"${(o.shippingAddress?.city || '').replace(/"/g, '""')}"`,
-                `"${(o.shippingAddress?.street || '').replace(/"/g, '""')}"`,
-                `"${o.paymentMethod || 'cod'}"`,
-                `"${STATUS_LABELS[o.status]?.label || o.status}"`,
-                o.totalPrice || 0,
-                `"${itemsStr.replace(/"/g, '""')}"`,
-              ].join(',')
-            })
+                const codAmount = o.paymentMethod === 'cod' || !o.paymentMethod ? (o.totalPrice || 0) : 0
 
-            const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n')
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-            const url = URL.createObjectURL(blob)
-            const link = document.createElement('a')
-            link.href = url
-            link.download = `saudi_brand_orders_${new Date().toISOString().slice(0, 10)}.csv`
-            link.click()
-            URL.revokeObjectURL(url)
-            toast.success('تم تصدير ملف الطلبات (Excel) بنجاح')
-          }}
-          leftIcon={<Download className="h-4 w-4" />}
-          className="text-xs font-bold"
-        >
-          تصدير إلى Excel ({filteredOrders.length})
-        </Button>
+                return [
+                  `"${(o.customerName || '').replace(/"/g, '""')}"`,
+                  `"${(o.customerPhone || '').replace(/"/g, '""')}"`,
+                  `"${(o.shippingAddress?.city || '').replace(/"/g, '""')}"`,
+                  `"${(o.shippingAddress?.street || '').replace(/"/g, '""')}"`,
+                  codAmount,
+                  `"${itemsStr.replace(/"/g, '""')}"`,
+                  `"#${o._id.slice(-6).toUpperCase()}"`,
+                  `"${(o.shippingAddress?.notes || '').replace(/"/g, '""')}"`,
+                ].join(',')
+              })
+
+              const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n')
+              const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+              const url = URL.createObjectURL(blob)
+              const link = document.createElement('a')
+              link.href = url
+              link.download = `bosta_courier_orders_${new Date().toISOString().slice(0, 10)}.csv`
+              link.click()
+              URL.revokeObjectURL(url)
+              toast.success('تم تصدير كشف بوليصات الشحن (بوسطة/مايلرز) بنجاح')
+            }}
+            leftIcon={<Truck className="h-4 w-4 text-emerald-600" />}
+            className="text-xs font-bold bg-white hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200"
+          >
+            كشف الشحن لبوسطة/مايلرز
+          </Button>
+
+          {/* Full Orders Excel Export */}
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              if (filteredOrders.length === 0) {
+                toast.error('لا توجد طلبات لتصديرها')
+                return
+              }
+
+              const headers = [
+                'رقم الطلب',
+                'تاريخ الطلب',
+                'اسم العميل',
+                'رقم الموبايل',
+                'المحافظة',
+                'العنوان بالتفصيل',
+                'طريقة الدفع',
+                'حالة الطلب',
+                'المبلغ الإجمالي',
+                'المنتجات',
+              ]
+
+              const rows = filteredOrders.map((o) => {
+                const itemsStr = (o.items || [])
+                  .map((it) => {
+                    const p = typeof it.productID === 'object' && it.productID !== null ? it.productID.name : ''
+                    return `${p} (${it.quantity})`
+                  })
+                  .join(' + ')
+
+                return [
+                  `#${o._id.slice(-6).toUpperCase()}`,
+                  o.createdAt ? new Date(o.createdAt).toLocaleDateString('ar-EG') : '',
+                  `"${(o.customerName || '').replace(/"/g, '""')}"`,
+                  `"${(o.customerPhone || '').replace(/"/g, '""')}"`,
+                  `"${(o.shippingAddress?.city || '').replace(/"/g, '""')}"`,
+                  `"${(o.shippingAddress?.street || '').replace(/"/g, '""')}"`,
+                  `"${o.paymentMethod || 'cod'}"`,
+                  `"${STATUS_LABELS[o.status]?.label || o.status}"`,
+                  o.totalPrice || 0,
+                  `"${itemsStr.replace(/"/g, '""')}"`,
+                ].join(',')
+              })
+
+              const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n')
+              const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+              const url = URL.createObjectURL(blob)
+              const link = document.createElement('a')
+              link.href = url
+              link.download = `saudi_brand_orders_${new Date().toISOString().slice(0, 10)}.csv`
+              link.click()
+              URL.revokeObjectURL(url)
+              toast.success('تم تصدير ملف الطلبات (Excel) بنجاح')
+            }}
+            leftIcon={<Download className="h-4 w-4" />}
+            className="text-xs font-bold"
+          >
+            تصدير إلى Excel ({filteredOrders.length})
+          </Button>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
@@ -328,6 +402,22 @@ export function AdminOrdersPage() {
                         <option value="cancelled">ملغي</option>
                       </select>
 
+                      {/* 1-Click WhatsApp Direct Chat */}
+                      {order.customerPhone && (
+                        <a
+                          href={getCustomerWhatsAppUrl(
+                            order.customerPhone,
+                            `أهلاً بك يا ${order.customerName || 'عميلنا العزيز'} 🌸، بخصوص طلبك رقم #${order._id.slice(-6).toUpperCase()} من متجر سعودي براند بقيمة ${order.totalPrice?.toFixed(2)} ج.م، هل تحب نأكد شحن الطلب لحضرتك؟`
+                          )}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="p-1.5 text-emerald-600 hover:text-emerald-700 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer"
+                          title="مراسلة وتأكيد الطلب عبر واتساب"
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                        </a>
+                      )}
+
                       {/* Print Waybill Button */}
                       <button
                         onClick={() => setSelectedWaybill(order)}
@@ -408,6 +498,38 @@ export function AdminOrdersPage() {
                               ? 'الدفع عند الاستلام'
                               : order.paymentMethod}
                           </p>
+                        )}
+
+                        {/* WhatsApp Quick Actions Bar */}
+                        {order.customerPhone && (
+                          <div className="flex flex-wrap items-center gap-2 pt-2.5 mt-2 border-t border-gray-100">
+                            <span className="text-[11px] font-bold text-gray-500">إجراءات واتساب:</span>
+                            <a
+                              href={getCustomerWhatsAppUrl(
+                                order.customerPhone,
+                                `أهلاً بك يا ${order.customerName || 'عميلنا العزيز'} 🌸، تم استلام طلبك رقم #${order._id.slice(-6).toUpperCase()} من متجر سعودي براند بقيمة ${order.totalPrice?.toFixed(2)} ج.م. العنوان المسجل لدينا: ${order.shippingAddress.city} - ${order.shippingAddress.street}. هل البيانات صحيحة لنبدأ في تجهيز الشحن فوراً؟`
+                              )}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition-colors cursor-pointer"
+                            >
+                              <MessageCircle className="h-3.5 w-3.5 text-emerald-600" />
+                              <span>تأكيد الأوردر والعنوان</span>
+                            </a>
+
+                            <a
+                              href={getCustomerWhatsAppUrl(
+                                order.customerPhone,
+                                `أهلاً بك يا ${order.customerName || 'عميلنا العزيز'} 🌸، بخصوص طلبك رقم #${order._id.slice(-6).toUpperCase()} بقيمة ${order.totalPrice?.toFixed(2)} ج.م، تم تجهيز الشحنة وتسليمها لشركة الشحن، ومندوب التوصيل سيتواصل معك خلال 24 إلى 48 ساعة. يسعدنا دائماً خدمتك!`
+                              )}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-xs font-bold transition-colors cursor-pointer"
+                            >
+                              <Truck className="h-3.5 w-3.5 text-blue-600" />
+                              <span>إشعار بخروج الشحنة</span>
+                            </a>
+                          </div>
                         )}
                       </div>
                     )}

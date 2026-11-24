@@ -4,6 +4,7 @@ interface Iitem {
     productID: mongoose.Types.ObjectId;
     quantity: number;
     price: number;
+    costPrice?: number;
 }
 
 export enum Status {
@@ -77,6 +78,11 @@ const OrderSchema = new mongoose.Schema<IOrder>({
                     type: Number,
                     required: true,
                     min: 0
+                },
+                costPrice: {
+                    type: Number,
+                    default: 0,
+                    min: 0
                 }
             }
         ],
@@ -110,5 +116,11 @@ const OrderSchema = new mongoose.Schema<IOrder>({
 }, {
     timestamps: true
 });
+
+// Performance Indexes for fast queries, analytics, and customer lookups
+OrderSchema.index({ status: 1, createdAt: -1 });
+OrderSchema.index({ createdAt: -1 });
+OrderSchema.index({ customerPhone: 1 });
+OrderSchema.index({ userID: 1, createdAt: -1 });
 
 export const Order = mongoose.model<IOrder>("Order", OrderSchema);

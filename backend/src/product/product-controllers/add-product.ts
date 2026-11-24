@@ -17,6 +17,7 @@ export const addProductValidation = [
         .notEmpty().withMessage("Price is required")
         .isFloat({ min: 0 }).withMessage("Price must be a positive number"),
     body("originalPrice").optional().isFloat({ min: 0 }).withMessage("Original price must be a positive number"),
+    body("costPrice").optional().isFloat({ min: 0 }).withMessage("Cost price must be a non-negative number"),
     body("stockQuantity").optional().isInt({ min: 0 }).withMessage("Stock quantity must be a non-negative integer"),
     body("isFeatured").optional().isBoolean(),
     body("description").optional().trim(),
@@ -30,6 +31,7 @@ export const addProduct: RequestHandler = async (req, res, next) => {
             name,
             price,
             originalPrice,
+            costPrice,
             stockQuantity,
             isFeatured,
             slug,
@@ -58,6 +60,7 @@ export const addProduct: RequestHandler = async (req, res, next) => {
             slug: generatedSlug,
             price: Number(price),
             originalPrice: originalPrice ? Number(originalPrice) : undefined,
+            costPrice: costPrice !== undefined && costPrice !== "" ? Number(costPrice) : 0,
             stockQuantity: stockQuantity !== undefined ? Number(stockQuantity) : 10,
             isFeatured: Boolean(isFeatured),
             imageUrl,

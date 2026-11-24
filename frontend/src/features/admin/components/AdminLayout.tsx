@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import {
   BarChart3,
   Boxes,
@@ -12,6 +12,7 @@ import {
   Users,
   Volume2,
   VolumeX,
+  Wallet,
   X,
 } from 'lucide-react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router'
@@ -21,6 +22,7 @@ import { useSettingsStore } from '../../settings/settings.store.ts'
 
 const navItems = [
   { to: '/admin', label: 'نظرة عامة', icon: BarChart3, end: true, permission: 'view_overview' },
+  { to: '/admin/finance', label: 'المالية والأرباح', icon: Wallet, permission: 'view_overview' },
   { to: '/admin/categories', label: 'الأقسام', icon: FolderTree, permission: 'manage_categories' },
   { to: '/admin/products', label: 'المنتجات', icon: Boxes, permission: 'manage_products' },
   { to: '/admin/orders', label: 'الطلبات', icon: ShoppingBag, permission: 'manage_orders' },
@@ -209,7 +211,16 @@ export function AdminLayout() {
 
       {/* Main Content Area */}
       <main className="flex-1 h-full overflow-y-auto p-4 sm:p-6 lg:p-8">
-        <Outlet />
+        <Suspense
+          fallback={
+            <div className="min-h-[50vh] flex flex-col items-center justify-center p-8 text-center font-sans" dir="rtl">
+              <div className="w-9 h-9 border-3 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin mb-3" />
+              <span className="text-xs font-bold text-gray-500">جارٍ تحميل القسم...</span>
+            </div>
+          }
+        >
+          <Outlet />
+        </Suspense>
       </main>
     </div>
   )

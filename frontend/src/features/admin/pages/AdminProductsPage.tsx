@@ -23,6 +23,7 @@ export function AdminProductsPage() {
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
   const [originalPrice, setOriginalPrice] = useState('')
+  const [costPrice, setCostPrice] = useState('')
   const [stockQuantity, setStockQuantity] = useState('20')
   const [isFeatured, setIsFeatured] = useState(false)
   const [description, setDescription] = useState('')
@@ -70,6 +71,7 @@ export function AdminProductsPage() {
       fd.append('name', name.trim())
       fd.append('price', price)
       if (originalPrice) fd.append('originalPrice', originalPrice)
+      if (costPrice) fd.append('costPrice', costPrice)
       if (stockQuantity) fd.append('stockQuantity', stockQuantity)
       fd.append('isFeatured', String(isFeatured))
       if (description) fd.append('description', description.trim())
@@ -104,6 +106,7 @@ export function AdminProductsPage() {
     setName('')
     setPrice('')
     setOriginalPrice('')
+    setCostPrice('')
     setStockQuantity('20')
     setIsFeatured(false)
     setDescription('')
@@ -118,6 +121,7 @@ export function AdminProductsPage() {
     setName(p.name)
     setPrice(String(p.price))
     setOriginalPrice(p.originalPrice ? String(p.originalPrice) : '')
+    setCostPrice(p.costPrice !== undefined ? String(p.costPrice) : '')
     setStockQuantity(p.stockQuantity !== undefined ? String(p.stockQuantity) : '20')
     setIsFeatured(Boolean(p.isFeatured))
     setDescription(p.description || '')
@@ -134,6 +138,7 @@ export function AdminProductsPage() {
     setName(`${p.name} (نسخة)`)
     setPrice(String(p.price))
     setOriginalPrice(p.originalPrice ? String(p.originalPrice) : '')
+    setCostPrice(p.costPrice !== undefined ? String(p.costPrice) : '')
     setStockQuantity(p.stockQuantity !== undefined ? String(p.stockQuantity) : '20')
     setIsFeatured(Boolean(p.isFeatured))
     setDescription(p.description || '')
@@ -257,6 +262,16 @@ export function AdminProductsPage() {
                             </span>
                           )}
                         </div>
+                        {p.costPrice !== undefined && p.costPrice > 0 && (
+                          <p className="text-[10px] text-gray-400 mt-0.5">
+                            التكلفة: <span className="font-semibold text-gray-600">{formatEGP(p.costPrice)}</span>
+                            {p.price > p.costPrice && (
+                              <span className="text-emerald-600 mr-1 font-bold">
+                                (+{formatEGP(p.price - p.costPrice)})
+                              </span>
+                            )}
+                          </p>
+                        )}
                       </td>
                       <td className="py-3 px-4">
                         <span
@@ -401,9 +416,9 @@ export function AdminProductsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">السعر الحالي (ج.م) *</label>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">سعر البيع (ج.م) *</label>
                   <Input
                     type="number"
                     min="0"
@@ -416,7 +431,25 @@ export function AdminProductsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">السعر الأصلي قبل الخصم (اختياري)</label>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                    سعر التكلفة (ج.م)
+                    <span className="text-[10px] text-gray-400 block font-normal">لحساب صافي الأرباح</span>
+                  </label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="any"
+                    value={costPrice}
+                    onChange={(e) => setCostPrice(e.target.value)}
+                    placeholder="150"
+                    className="w-full text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                    السعر قبل الخصم
+                    <span className="text-[10px] text-gray-400 block font-normal">اختياري</span>
+                  </label>
                   <Input
                     type="number"
                     min="0"

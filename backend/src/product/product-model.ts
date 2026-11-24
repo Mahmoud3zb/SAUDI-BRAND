@@ -11,6 +11,7 @@ export interface IProduct {
     slug?: string;
     price: number;
     originalPrice?: number;
+    costPrice?: number;
     stockQuantity?: number;
     rating?: IProductRating;
     imageUrl: string;
@@ -45,6 +46,11 @@ const ProductSchema = new mongoose.Schema<IProduct>({
         type: Number,
         min: [0, "Original price must be at least 0"]
     },
+    costPrice: {
+        type: Number,
+        default: 0,
+        min: [0, "Cost price must be at least 0"]
+    },
     stockQuantity: {
         type: Number,
         default: 10,
@@ -77,5 +83,6 @@ const ProductSchema = new mongoose.Schema<IProduct>({
 ProductSchema.index({ name: "text", description: "text" });
 ProductSchema.index({ categoryID: 1, isActive: 1 });
 ProductSchema.index({ price: 1 });
+ProductSchema.index({ isActive: 1, createdAt: -1 });
 
 export const Product = mongoose.model<IProduct>("Product", ProductSchema);

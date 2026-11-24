@@ -127,6 +127,7 @@ export const createOrder: RequestHandler = async (req, res, next) => {
             productID: mongoose.Types.ObjectId;
             quantity: number;
             price: number;
+            costPrice?: number;
         }> = [];
 
         for (const item of itemsToOrder) {
@@ -135,7 +136,8 @@ export const createOrder: RequestHandler = async (req, res, next) => {
             orderItems.push({
                 productID: prod._id as mongoose.Types.ObjectId,
                 quantity: item.quantity,
-                price: prod.price
+                price: prod.price,
+                costPrice: prod.costPrice || 0
             });
 
             // Atomically decrement stock

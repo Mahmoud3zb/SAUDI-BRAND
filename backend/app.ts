@@ -12,6 +12,7 @@ import helmet from "helmet";
 import { cartRouter } from "./src/cart/cart-router";
 import orderRouter from "./src/order/order-router";
 import settingRouter from "./src/setting/setting-router";
+import { financeRouter } from "./src/finance/finance-router";
 import bcrypt from "bcrypt";
 import { User, Role } from "./src/user/user-model";
 
@@ -33,7 +34,7 @@ async function ensureAdminUser() {
         const adminEmail = "admin@saudibrand.com";
         const hashedPassword = await bcrypt.hash("admin123", 10);
         const existing = await User.findOne({ email: adminEmail });
-        const allPermissions = ["manage_products", "manage_categories", "manage_orders", "view_overview", "manage_admins", "manage_settings"];
+        const allPermissions = ["manage_products", "manage_categories", "manage_orders", "view_overview", "manage_admins", "manage_settings", "manage_finance"];
 
         if (!existing) {
             await User.create({
@@ -45,13 +46,18 @@ async function ensureAdminUser() {
             });
             console.log("✅ Super Admin user ready: admin@saudibrand.com / admin123");
         } else {
-            const matches = await bcrypt.compare("admin123", existing.password);
-            if (!matches || existing.role !== Role.SUPER_ADMIN || !existing.permissions || existing.permissions.length === 0) {
-                existing.password = hashedPassword;
+            let updated = false;
+            if (existing.role !== Role.SUPER_ADMIN) {
                 existing.role = Role.SUPER_ADMIN;
+                updated = true;
+            }
+            if (!existing.permissions || existing.permissions.length === 0) {
                 existing.permissions = allPermissions;
+                updated = true;
+            }
+            if (updated) {
                 await existing.save();
-                console.log("✅ Super Admin role and full permissions updated: admin@saudibrand.com");
+                console.log("✅ Super Admin role and full permissions ensured without overwriting password: admin@saudibrand.com");
             }
         }
     } catch (e) {
@@ -144,6 +150,7 @@ app.use("/api/product",productRouter)
 app.use("/api/cart",cartRouter)
 app.use("/api/order",orderRouter)
 app.use("/api/settings", settingRouter)
+app.use("/api/finance", financeRouter)
 
 app.get('/', (req, res) => {
     res.status(200).send('SAUDI-BRAND API is running');
