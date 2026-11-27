@@ -30,6 +30,7 @@ export function AdminCategoriesPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] })
+      queryClient.invalidateQueries({ queryKey: ['categories'] })
       setIsModalOpen(false)
     },
     onError: (err: unknown) => {
@@ -41,6 +42,7 @@ export function AdminCategoriesPage() {
     mutationFn: (id: string) => adminApi.toggleCategoryStatus(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] })
+      queryClient.invalidateQueries({ queryKey: ['categories'] })
     },
   })
 
